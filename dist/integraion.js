@@ -631,6 +631,7 @@ class IfAPGLExpr extends APGLExpr {
 }
 class LoopAPGLExpr extends APGLExpr {
     body;
+    kind = "loop";
     constructor(body){
         super();
         this.body = body;
