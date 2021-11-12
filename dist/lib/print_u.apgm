@@ -80,7 +80,8 @@ macro sub_u!(x, y) {
 
 /**
  * non-destructive
- * after: x = max(0, x - y)
+ * before: temp0 = 0, temp1 = 1
+ * after: x = max(0, x - y), temp0 = 0, temp1 = 0
  */
 macro sub_nd_u!(x, y, temp0, temp1) {
     copy_u!(y, temp0, temp1);
@@ -199,7 +200,10 @@ macro print_u!(reg, step /* temp0 */ , x /* temp1 */ , temp2, temp3, temp4) {
             }, {
                 /* step > reg */
                 print_digit_u!(x);
-                equal_to_one_u!(step, break(2), {});
+                equal_to_one_u!(step, {
+                    zero_u(step); /* cleanup */
+                    break(2)
+                }, {});
                 div_by_constant_u!(step, temp2, 10);
                 break();
             });
