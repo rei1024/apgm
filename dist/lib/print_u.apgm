@@ -201,8 +201,8 @@ macro print_u!(reg, step /* temp0 */ , x /* temp1 */ , temp2, temp3, temp4) {
                 /* step > reg */
                 print_digit_u!(x);
                 equal_to_one_u!(step, {
-                    zero_u(step); /* cleanup */
-                    break(2)
+                    zero_u!(step); /* cleanup */
+                    break(2);
                 }, {});
                 div_by_constant_u!(step, temp2, 10);
                 break();

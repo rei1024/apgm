@@ -884,6 +884,9 @@ function transpileAPGMExpr(expr) {
     }
     throw Error("internal error");
 }
+function isEmptyExpr(expr) {
+    return expr instanceof SeqAPGLExpr && expr.exprs.length === 0;
+}
 class Transpiler {
     lines = [];
     id = 0;
@@ -959,6 +962,12 @@ class Transpiler {
         return state;
     }
     transpileIfAPGLExpr(state, ifExpr) {
+        if (isEmptyExpr(ifExpr.elseBody)) {
+            return this.transpileIfAPGLExprOnlyZ(state, ifExpr.cond, ifExpr.thenBody);
+        }
+        if (isEmptyExpr(ifExpr.thenBody)) {
+            return this.transpileIfAPGLExprOnlyNZ(state, ifExpr.cond, ifExpr.elseBody);
+        }
         const condEndState = this.transpileExpr(state, ifExpr.cond);
         const thenStartState = this.getFreshName() + "_IF_Z";
         const elseStartState = this.getFreshName() + "_IF_NZ";
@@ -982,6 +991,50 @@ class Transpiler {
         const elseEndState = this.transpileExpr(elseStartState, ifExpr.elseBody);
         this.transition(thenEndState, elseEndState);
         return elseEndState;
+    }
+    transpileIfAPGLExprOnlyZ(state, cond, body) {
+        const condEndState = this.transpileExpr(state, cond);
+        const thenStartState = this.getFreshName() + "_IF_Z";
+        const endState = this.transpileExpr(thenStartState, body);
+        this.emitLine({
+            currentState: condEndState,
+            prevOutput: "Z",
+            nextState: thenStartState,
+            actions: [
+                "NOP"
+            ]
+        });
+        this.emitLine({
+            currentState: condEndState,
+            prevOutput: "NZ",
+            nextState: endState,
+            actions: [
+                "NOP"
+            ]
+        });
+        return endState;
+    }
+    transpileIfAPGLExprOnlyNZ(state, cond, body) {
+        const condEndState = this.transpileExpr(state, cond);
+        const bodyStartState = this.getFreshName() + "_IF_NZ";
+        const endState = this.transpileExpr(bodyStartState, body);
+        this.emitLine({
+            currentState: condEndState,
+            prevOutput: "Z",
+            nextState: endState,
+            actions: [
+                "NOP"
+            ]
+        });
+        this.emitLine({
+            currentState: condEndState,
+            prevOutput: "NZ",
+            nextState: bodyStartState,
+            actions: [
+                "NOP"
+            ]
+        });
+        return endState;
     }
     transpileLoopAPGLExpr(state, loopExpr) {
         const breakState = this.getFreshName() + "_LOOP_BREAK";
@@ -1139,7 +1192,7 @@ function integration1(str, log = false) {
     const apgs = transpileAPGL(apgl);
     const comment = [
         "# State    Input    Next state    Actions",
-        "# ---------------------------------------"
+        "# ---------------------------------------", 
     ];
     const head = apgm.headers.map((x)=>`#${x.name} ${x.content}`
     );

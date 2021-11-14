@@ -18,8 +18,8 @@ export function integration(str: string, log: boolean = false): string[] {
 
     const apgs = transpileAPGL(apgl);
     const comment = [
-        "# State    Input    Next state    Actions"
-        ,"# ---------------------------------------"
+        "# State    Input    Next state    Actions",
+        "# ---------------------------------------",
     ];
     const head = apgm.headers.map((x) => `#${x.name} ${x.content}`);
     return head.concat(comment, apgs);
