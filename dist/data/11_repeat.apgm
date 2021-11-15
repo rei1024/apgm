@@ -1,5 +1,7 @@
 /*
     repeat
+
+    repeat(<number>, <expression>);
 */
 
 macro repeat_dot!(n) {

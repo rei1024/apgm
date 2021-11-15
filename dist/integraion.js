@@ -424,6 +424,13 @@ class Header {
         this.name = name;
         this.content = content;
     }
+    toString() {
+        if (this.content.startsWith(' ')) {
+            return `#${this.name}${this.content}`;
+        } else {
+            return `#${this.name} ${this.content}`;
+        }
+    }
 }
 class NumberAPGMExpr extends APGMExpr {
     value;
