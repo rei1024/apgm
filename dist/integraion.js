@@ -1201,7 +1201,7 @@ function integration1(str, log = false) {
         "# State    Input    Next state    Actions",
         "# ---------------------------------------", 
     ];
-    const head = apgm.headers.map((x)=>`#${x.name} ${x.content}`
+    const head = apgm.headers.map((x)=>x.toString()
     );
     return head.concat(comment, apgs);
 }
