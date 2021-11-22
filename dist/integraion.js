@@ -1,28 +1,28 @@
 class Parser {
-    constructor(action){
+    constructor(action) {
         this.action = action;
     }
     parse(input) {
         const location2 = {
             index: 0,
             line: 1,
-            column: 1
+            column: 1,
         };
         const context = new Context({
             input,
-            location: location2
+            location: location2,
         });
         const result = this.skip(eof).action(context);
         if (result.type === "ActionOK") {
             return {
                 type: "ParseOK",
-                value: result.value
+                value: result.value,
             };
         }
         return {
             type: "ParseFail",
             location: result.furthest,
-            expected: result.expected
+            expected: result.expected,
         };
     }
     tryParse(input) {
@@ -30,13 +30,16 @@ class Parser {
         if (result.type === "ParseOK") {
             return result.value;
         }
-        const { expected , location: location2  } = result;
-        const { line , column  } = location2;
-        const message = `parse error at line ${line} column ${column}: expected ${expected.join(", ")}`;
+        const { expected, location: location2 } = result;
+        const { line, column } = location2;
+        const message =
+            `parse error at line ${line} column ${column}: expected ${
+                expected.join(", ")
+            }`;
         throw new Error(message);
     }
     and(parserB) {
-        return new Parser((context)=>{
+        return new Parser((context) => {
             const a = this.action(context);
             if (a.type === "ActionFail") {
                 return a;
@@ -46,7 +49,7 @@ class Parser {
             if (b.type === "ActionOK") {
                 const value = [
                     a.value,
-                    b.value
+                    b.value,
                 ];
                 return context.merge(b, context.ok(b.location.index, value));
             }
@@ -54,15 +57,13 @@ class Parser {
         });
     }
     skip(parserB) {
-        return this.and(parserB).map(([a])=>a
-        );
+        return this.and(parserB).map(([a]) => a);
     }
     next(parserB) {
-        return this.and(parserB).map(([, b])=>b
-        );
+        return this.and(parserB).map(([, b]) => b);
     }
     or(parserB) {
-        return new Parser((context)=>{
+        return new Parser((context) => {
             const a = this.action(context);
             if (a.type === "ActionOK") {
                 return a;
@@ -71,7 +72,7 @@ class Parser {
         });
     }
     chain(fn) {
-        return new Parser((context)=>{
+        return new Parser((context) => {
             const a = this.action(context);
             if (a.type === "ActionFail") {
                 return a;
@@ -82,7 +83,7 @@ class Parser {
         });
     }
     map(fn) {
-        return this.chain((a)=>{
+        return this.chain((a) => {
             return ok(fn(a));
         });
     }
@@ -90,7 +91,7 @@ class Parser {
         return fn(this);
     }
     desc(expected) {
-        return new Parser((context)=>{
+        return new Parser((context) => {
             const result = this.action(context);
             if (result.type === "ActionOK") {
                 return result;
@@ -98,7 +99,7 @@ class Parser {
             return {
                 type: "ActionFail",
                 furthest: result.furthest,
-                expected
+                expected,
             };
         });
     }
@@ -115,16 +116,18 @@ class Parser {
         if (min === 0) {
             return this.repeat(1, max).or(ok([]));
         }
-        return new Parser((context)=>{
+        return new Parser((context) => {
             const items = [];
             let result = this.action(context);
             if (result.type === "ActionFail") {
                 return result;
             }
-            while(result.type === "ActionOK" && items.length < max){
+            while (result.type === "ActionOK" && items.length < max) {
                 items.push(result.value);
                 if (result.location.index === context.location.index) {
-                    throw new Error("infinite loop detected; don't call .repeat() with parsers that can accept zero characters");
+                    throw new Error(
+                        "infinite loop detected; don't call .repeat() with parsers that can accept zero characters",
+                    );
                 }
                 context = context.moveTo(result.location);
                 result = context.merge(result, this.action(context));
@@ -132,7 +135,10 @@ class Parser {
             if (result.type === "ActionFail" && items.length < min) {
                 return result;
             }
-            return context.merge(result, context.ok(context.location.index, items));
+            return context.merge(
+                result,
+                context.ok(context.location.index, items),
+            );
         });
     }
     sepBy(separator, min = 0, max = Infinity) {
@@ -143,72 +149,72 @@ class Parser {
             return this.sepBy(separator, 1, max).or(ok([]));
         }
         if (max === 1) {
-            return this.map((x)=>[
-                    x
-                ]
-            );
+            return this.map((x) => [
+                x,
+            ]);
         }
-        return this.chain((first)=>{
-            return separator.next(this).repeat(min - 1, max - 1).map((rest)=>{
+        return this.chain((first) => {
+            return separator.next(this).repeat(min - 1, max - 1).map((rest) => {
                 return [
                     first,
-                    ...rest
+                    ...rest,
                 ];
             });
         });
     }
     node(name) {
-        return all(location, this, location).map(([start, value, end])=>{
+        return all(location, this, location).map(([start, value, end]) => {
             const type = "ParseNode";
             return {
                 type,
                 name,
                 value,
                 start,
-                end
+                end,
             };
         });
     }
 }
 function isRangeValid(min, max) {
-    return min <= max && min >= 0 && max >= 0 && Number.isInteger(min) && min !== Infinity && (Number.isInteger(max) || max === Infinity);
+    return min <= max && min >= 0 && max >= 0 && Number.isInteger(min) &&
+        min !== Infinity && (Number.isInteger(max) || max === Infinity);
 }
-const location = new Parser((context)=>{
+const location = new Parser((context) => {
     return context.ok(context.location.index, context.location);
 });
 function ok(value) {
-    return new Parser((context)=>{
+    return new Parser((context) => {
         return context.ok(context.location.index, value);
     });
 }
 function fail(expected) {
-    return new Parser((context)=>{
+    return new Parser((context) => {
         return context.fail(context.location.index, expected);
     });
 }
-const eof = new Parser((context)=>{
+const eof = new Parser((context) => {
     if (context.location.index < context.input.length) {
         return context.fail(context.location.index, [
-            "<EOF>"
+            "<EOF>",
         ]);
     }
     return context.ok(context.location.index, "<EOF>");
 });
 function text(string) {
-    return new Parser((context)=>{
+    return new Parser((context) => {
         const start = context.location.index;
         const end = start + string.length;
         if (context.input.slice(start, end) === string) {
             return context.ok(end, string);
         }
         return context.fail(start, [
-            string
+            string,
         ]);
     });
 }
 function match(regexp) {
-    for (const flag of regexp.flags){
-        switch(flag){
+    for (const flag of regexp.flags) {
+        switch (flag) {
             case "i":
             case "s":
             case "m":
@@ -219,7 +225,7 @@ function match(regexp) {
         }
     }
     const sticky = new RegExp(regexp.source, regexp.flags + "y");
-    return new Parser((context)=>{
+    return new Parser((context) => {
         const start = context.location.index;
         sticky.lastIndex = start;
         const match2 = context.input.match(sticky);
@@ -229,29 +235,29 @@ function match(regexp) {
             return context.ok(end, string);
         }
         return context.fail(start, [
-            String(regexp)
+            String(regexp),
         ]);
     });
 }
 function all(...parsers) {
-    return parsers.reduce((acc, p)=>{
-        return acc.chain((array)=>{
-            return p.map((value)=>{
+    return parsers.reduce((acc, p) => {
+        return acc.chain((array) => {
+            return p.map((value) => {
                 return [
                     ...array,
-                    value
+                    value,
                 ];
             });
         });
     }, ok([]));
 }
 function choice(...parsers) {
-    return parsers.reduce((acc, p)=>{
+    return parsers.reduce((acc, p) => {
         return acc.or(p);
     });
 }
 function lazy(fn) {
-    const parser = new Parser((context)=>{
+    const parser = new Parser((context) => {
         parser.action = fn().action;
         return parser.action(context);
     });
@@ -261,19 +267,19 @@ function union(a, b) {
     return [
         ...new Set([
             ...a,
-            ...b
-        ])
+            ...b,
+        ]),
     ];
 }
 class Context {
-    constructor(options){
+    constructor(options) {
         this.input = options.input;
         this.location = options.location;
     }
     moveTo(location2) {
         return new Context({
             input: this.input,
-            location: location2
+            location: location2,
         });
     }
     _internal_move(index) {
@@ -283,8 +289,8 @@ class Context {
         const start = this.location.index;
         const end = index;
         const chunk = this.input.slice(start, end);
-        let { line , column  } = this.location;
-        for (const ch of chunk){
+        let { line, column } = this.location;
+        for (const ch of chunk) {
             if (ch === "\n") {
                 line++;
                 column = 1;
@@ -295,7 +301,7 @@ class Context {
         return {
             index,
             line,
-            column
+            column,
         };
     }
     ok(index, value) {
@@ -306,40 +312,42 @@ class Context {
             furthest: {
                 index: -1,
                 line: -1,
-                column: -1
+                column: -1,
             },
-            expected: []
+            expected: [],
         };
     }
     fail(index, expected) {
         return {
             type: "ActionFail",
             furthest: this._internal_move(index),
-            expected
+            expected,
         };
     }
     merge(a, b) {
         if (b.furthest.index > a.furthest.index) {
             return b;
         }
-        const expected = b.furthest.index === a.furthest.index ? union(a.expected, b.expected) : a.expected;
+        const expected = b.furthest.index === a.furthest.index
+            ? union(a.expected, b.expected)
+            : a.expected;
         if (b.type === "ActionOK") {
             return {
                 type: "ActionOK",
                 location: b.location,
                 value: b.value,
                 furthest: a.furthest,
-                expected
+                expected,
             };
         }
         return {
             type: "ActionFail",
             furthest: a.furthest,
-            expected
+            expected,
         };
     }
 }
-const mod1 = function() {
+const mod1 = function () {
     return {
         default: null,
         Parser,
@@ -351,21 +359,32 @@ const mod1 = function() {
         location,
         match,
         ok,
-        text
+        text,
     };
 }();
+const decimalNaturalParser = mod1.match(/[0-9]+/).desc([
+    "number",
+]).map((x) => parseInt(x, 10));
+const hexadecimalNaturalParser = mod1.match(/0x[0-9]+/).desc([
+    "hexadecimal number",
+]).map((x) => parseInt(x, 16));
+const naturalNumberParser = hexadecimalNaturalParser.or(decimalNaturalParser)
+    .desc([
+        "number",
+    ]);
 class APGMExpr {
-    constructor(){
+    constructor() {
     }
 }
 class FuncAPGMExpr extends APGMExpr {
     name;
     args;
     transform(f) {
-        return f(new FuncAPGMExpr(this.name, this.args.map((x)=>x.transform(f)
-        )));
+        return f(
+            new FuncAPGMExpr(this.name, this.args.map((x) => x.transform(f))),
+        );
     }
-    constructor(name, args){
+    constructor(name, args) {
         super();
         this.name = name;
         this.args = args;
@@ -376,7 +395,7 @@ class IfAPGMExpr extends APGMExpr {
     cond;
     thenBody;
     elseBody;
-    constructor(modifier, cond, thenBody, elseBody){
+    constructor(modifier, cond, thenBody, elseBody) {
         super();
         this.modifier = modifier;
         this.cond = cond;
@@ -384,12 +403,21 @@ class IfAPGMExpr extends APGMExpr {
         this.elseBody = elseBody;
     }
     transform(f) {
-        return f(new IfAPGMExpr(this.modifier, this.cond.transform(f), this.thenBody.transform(f), this.elseBody !== undefined ? this.elseBody.transform(f) : undefined));
+        return f(
+            new IfAPGMExpr(
+                this.modifier,
+                this.cond.transform(f),
+                this.thenBody.transform(f),
+                this.elseBody !== undefined
+                    ? this.elseBody.transform(f)
+                    : undefined,
+            ),
+        );
     }
 }
 class LoopAPGMExpr extends APGMExpr {
     body;
-    constructor(body){
+    constructor(body) {
         super();
         this.body = body;
     }
@@ -401,7 +429,7 @@ class Macro {
     name;
     args;
     body;
-    constructor(name, args, body){
+    constructor(name, args, body) {
         this.name = name;
         this.args = args;
         this.body = body;
@@ -411,7 +439,7 @@ class Main {
     macros;
     headers;
     seqExpr;
-    constructor(macros, headers, seqExpr){
+    constructor(macros, headers, seqExpr) {
         this.macros = macros;
         this.headers = headers;
         this.seqExpr = seqExpr;
@@ -425,7 +453,7 @@ class Main {
 class Header {
     name;
     content;
-    constructor(name, content){
+    constructor(name, content) {
         this.name = name;
         this.content = content;
     }
@@ -439,7 +467,7 @@ class Header {
 }
 class NumberAPGMExpr extends APGMExpr {
     value;
-    constructor(value){
+    constructor(value) {
         super();
         this.value = value;
     }
@@ -449,7 +477,7 @@ class NumberAPGMExpr extends APGMExpr {
 }
 class StringAPGMExpr extends APGMExpr {
     value;
-    constructor(value){
+    constructor(value) {
         super();
         this.value = value;
     }
@@ -459,18 +487,17 @@ class StringAPGMExpr extends APGMExpr {
 }
 class SeqAPGMExpr extends APGMExpr {
     exprs;
-    constructor(exprs){
+    constructor(exprs) {
         super();
         this.exprs = exprs;
     }
     transform(f) {
-        return f(new SeqAPGMExpr(this.exprs.map((x)=>x.transform(f)
-        )));
+        return f(new SeqAPGMExpr(this.exprs.map((x) => x.transform(f))));
     }
 }
 class VarAPGMExpr extends APGMExpr {
     name;
-    constructor(name){
+    constructor(name) {
         super();
         this.name = name;
     }
@@ -482,34 +509,39 @@ class WhileAPGMExpr extends APGMExpr {
     modifier;
     cond;
     body;
-    constructor(modifier, cond, body){
+    constructor(modifier, cond, body) {
         super();
         this.modifier = modifier;
         this.cond = cond;
         this.body = body;
     }
     transform(f) {
-        return f(new WhileAPGMExpr(this.modifier, this.cond.transform(f), this.body.transform(f)));
+        return f(
+            new WhileAPGMExpr(
+                this.modifier,
+                this.cond.transform(f),
+                this.body.transform(f),
+            ),
+        );
     }
 }
 const comment = mod1.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc([
-    "comment"
+    "comment",
 ]);
 const _ = mod1.match(/\s*/).desc([
-    "space"
-]).sepBy(comment).map((x)=>undefined
-);
+    "space",
+]).sepBy(comment).map((x) => undefined);
 const someSpaces = mod1.match(/\s+/).desc([
-    "space"
+    "space",
 ]);
 const identifierRexExp = /[a-zA-Z_][a-zA-Z_0-9]*/u;
 const identifierOnly = mod1.match(identifierRexExp).desc([
-    "identifier"
+    "identifier",
 ]);
 const identifier = _.next(identifierOnly).skip(_);
 const macroIdentifierRegExp = /[a-zA-Z_][a-zA-Z_0-9]*!/u;
 const macroIdentifier = _.next(mod1.match(macroIdentifierRegExp)).skip(_).desc([
-    "macro name"
+    "macro name",
 ]);
 function token(s) {
     return _.next(mod1.text(s)).skip(_);
@@ -517,87 +549,89 @@ function token(s) {
 const comma = token(",");
 const leftParen = token("(");
 const rightParen = token(")");
-const varAPGMExpr = identifier.map((x)=>new VarAPGMExpr(x)
-);
+const varAPGMExpr = identifier.map((x) => new VarAPGMExpr(x));
 function funcAPGMExpr() {
-    return mod1.choice(macroIdentifier, identifier).chain((ident)=>{
-        return leftParen.next(mod1.lazy(()=>apgmExpr()
-        ).sepBy(comma).skip(rightParen)).map((args)=>{
+    return mod1.choice(macroIdentifier, identifier).chain((ident) => {
+        return leftParen.next(
+            mod1.lazy(() => apgmExpr()).sepBy(comma).skip(rightParen),
+        ).map((args) => {
             return new FuncAPGMExpr(ident, args);
         });
     });
 }
-const numberAPGMExpr = mod1.match(/[0-9]+/).desc([
-    "number"
-]).map((x)=>new NumberAPGMExpr(Number(x))
-);
-const stringLit = _.next(mod1.text(`"`)).next(mod1.match(/[^"]*/)).skip(mod1.text(`"`)).skip(_).desc([
-    "string"
+const numberAPGMExpr = _.next(
+    naturalNumberParser.map((x) => new NumberAPGMExpr(x)),
+).skip(_);
+const stringLit = _.next(mod1.text(`"`)).next(mod1.match(/[^"]*/)).skip(
+    mod1.text(`"`),
+).skip(_).desc([
+    "string",
 ]);
-const stringAPGMExpr = stringLit.map((x)=>new StringAPGMExpr(x)
-);
+const stringAPGMExpr = stringLit.map((x) => new StringAPGMExpr(x));
 function seqAPGMExprRaw() {
-    return mod1.lazy(()=>statement()
-    ).repeat();
+    return mod1.lazy(() => statement()).repeat();
 }
 function seqAPGMExpr() {
-    return token("{").next(seqAPGMExprRaw()).skip(token("}")).map((x)=>new SeqAPGMExpr(x)
+    return token("{").next(seqAPGMExprRaw()).skip(token("}")).map((x) =>
+        new SeqAPGMExpr(x)
     );
 }
-const whileKeyword = mod1.choice(token("while_z"), token("while_nz")).map((x)=>x === "while_z" ? "Z" : "NZ"
+const whileKeyword = mod1.choice(token("while_z"), token("while_nz")).map((x) =>
+    x === "while_z" ? "Z" : "NZ"
 );
 function whileAPGMExpr() {
-    return whileKeyword.chain((mod)=>{
-        return token("(").next(mod1.lazy(()=>apgmExpr()
-        )).skip(token(")")).chain((cond)=>{
-            return mod1.lazy(()=>apgmExpr()
-            ).map((body)=>new WhileAPGMExpr(mod, cond, body)
-            );
-        });
+    return whileKeyword.chain((mod) => {
+        return token("(").next(mod1.lazy(() => apgmExpr())).skip(token(")"))
+            .chain((cond) => {
+                return mod1.lazy(() => apgmExpr()).map((body) =>
+                    new WhileAPGMExpr(mod, cond, body)
+                );
+            });
     });
 }
 function loopAPGMExpr() {
-    return token("loop").next(mod1.lazy(()=>apgmExpr()
-    )).map((x)=>new LoopAPGMExpr(x)
+    return token("loop").next(mod1.lazy(() => apgmExpr())).map((x) =>
+        new LoopAPGMExpr(x)
     );
 }
-const ifKeyword = mod1.choice(token("if_z"), token("if_nz")).map((x)=>x === "if_z" ? "Z" : "NZ"
+const ifKeyword = mod1.choice(token("if_z"), token("if_nz")).map((x) =>
+    x === "if_z" ? "Z" : "NZ"
 );
 function ifAPGMExpr() {
-    return ifKeyword.chain((mod)=>{
-        return token("(").next(mod1.lazy(()=>apgmExpr()
-        )).skip(token(")")).chain((cond)=>{
-            return mod1.lazy(()=>apgmExpr()
-            ).chain((body)=>{
-                return mod1.choice(token("else").next(mod1.lazy(()=>apgmExpr()
-                )), mod1.ok(undefined)).map((eleBody)=>{
-                    return new IfAPGMExpr(mod, cond, body, eleBody);
+    return ifKeyword.chain((mod) => {
+        return token("(").next(mod1.lazy(() => apgmExpr())).skip(token(")"))
+            .chain((cond) => {
+                return mod1.lazy(() => apgmExpr()).chain((body) => {
+                    return mod1.choice(
+                        token("else").next(mod1.lazy(() => apgmExpr())),
+                        mod1.ok(undefined),
+                    ).map((eleBody) => {
+                        return new IfAPGMExpr(mod, cond, body, eleBody);
+                    });
                 });
             });
-        });
     });
 }
 function macro() {
-    return _.next(mod1.text("macro")).skip(someSpaces).next(macroIdentifier).chain((ident)=>{
-        return leftParen.next(varAPGMExpr.sepBy(comma).skip(rightParen)).chain((args)=>{
-            return mod1.lazy(()=>apgmExpr()
-            ).map((body)=>{
-                return new Macro(ident, args, body);
-            });
+    return _.next(mod1.text("macro")).skip(someSpaces).next(macroIdentifier)
+        .chain((ident) => {
+            return leftParen.next(varAPGMExpr.sepBy(comma).skip(rightParen))
+                .chain((args) => {
+                    return mod1.lazy(() => apgmExpr()).map((body) => {
+                        return new Macro(ident, args, body);
+                    });
+                });
         });
-    });
 }
 const header = mod1.text("#").next(mod1.match(/REGISTERS|COMPONENTS/)).desc([
     "#REGISTERS",
-    "#COMPONENT"
-]).chain((x)=>mod1.match(/.*/).map((c)=>new Header(x, c)
-    )
-);
+    "#COMPONENT",
+]).chain((x) => mod1.match(/.*/).map((c) => new Header(x, c)));
 const headers1 = _.next(header).skip(_).repeat();
 function main1() {
-    return macro().repeat().chain((macros)=>{
-        return headers1.chain((h)=>{
-            return _.next(seqAPGMExprRaw()).skip(_).map((x)=>{
+    return macro().repeat().chain((macros) => {
+        return headers1.chain((h) => {
+            return _.next(seqAPGMExprRaw()).skip(_).map((x) => {
                 return new Main(macros, h, new SeqAPGMExpr(x));
             });
         });
@@ -607,25 +641,39 @@ function tryParseMain(str) {
     return main1().tryParse(str);
 }
 function apgmExpr() {
-    return mod1.choice(loopAPGMExpr(), whileAPGMExpr(), ifAPGMExpr(), funcAPGMExpr(), seqAPGMExpr(), varAPGMExpr, numberAPGMExpr, stringAPGMExpr);
+    return mod1.choice(
+        loopAPGMExpr(),
+        whileAPGMExpr(),
+        ifAPGMExpr(),
+        funcAPGMExpr(),
+        seqAPGMExpr(),
+        varAPGMExpr,
+        numberAPGMExpr,
+        stringAPGMExpr,
+    );
 }
 function statement() {
-    return mod1.choice(loopAPGMExpr(), whileAPGMExpr(), ifAPGMExpr(), apgmExpr().skip(token(";")));
+    return mod1.choice(
+        loopAPGMExpr(),
+        whileAPGMExpr(),
+        ifAPGMExpr(),
+        apgmExpr().skip(token(";")),
+    );
 }
 class APGLExpr {
-    constructor(){
+    constructor() {
     }
 }
 class ActionAPGLExpr extends APGLExpr {
     actions;
-    constructor(actions){
+    constructor(actions) {
         super();
         this.actions = actions;
     }
 }
 class SeqAPGLExpr extends APGLExpr {
     exprs;
-    constructor(exprs){
+    constructor(exprs) {
         super();
         this.exprs = exprs;
     }
@@ -634,7 +682,7 @@ class IfAPGLExpr extends APGLExpr {
     cond;
     thenBody;
     elseBody;
-    constructor(cond, thenBody, elseBody){
+    constructor(cond, thenBody, elseBody) {
         super();
         this.cond = cond;
         this.thenBody = thenBody;
@@ -644,7 +692,7 @@ class IfAPGLExpr extends APGLExpr {
 class LoopAPGLExpr extends APGLExpr {
     body;
     kind = "loop";
-    constructor(body){
+    constructor(body) {
         super();
         this.body = body;
     }
@@ -653,7 +701,7 @@ class WhileAPGLExpr extends APGLExpr {
     modifier;
     cond;
     body;
-    constructor(modifier, cond, body){
+    constructor(modifier, cond, body) {
         super();
         this.modifier = modifier;
         this.cond = cond;
@@ -663,7 +711,7 @@ class WhileAPGLExpr extends APGLExpr {
 class BreakAPGLExpr extends APGLExpr {
     level;
     kind = "break";
-    constructor(level){
+    constructor(level) {
         super();
         this.level = level;
     }
@@ -674,9 +722,8 @@ class A {
     }
     static incUMulti(...args) {
         return new ActionAPGLExpr([
-            ...args.map((x)=>`INC U${x}`
-            ),
-            "NOP"
+            ...args.map((x) => `INC U${x}`),
+            "NOP",
         ]);
     }
     static tdecU(n) {
@@ -748,12 +795,12 @@ class A {
     static nonReturn(act) {
         return new ActionAPGLExpr([
             act,
-            "NOP"
+            "NOP",
         ]);
     }
     static single(act) {
         return new ActionAPGLExpr([
-            act
+            act,
         ]);
     }
 }
@@ -784,31 +831,22 @@ function transpileStringArgFunc(funcExpr, expr) {
     return expr(arg.value);
 }
 function transpileFuncAPGMExpr(funcExpr) {
-    const e = (a)=>transpileEmptyArgFunc(funcExpr, a)
-    ;
-    const n = (a)=>transpileNumArgFunc(funcExpr, a)
-    ;
-    const s = (a)=>transpileStringArgFunc(funcExpr, a)
-    ;
-    switch(funcExpr.name){
+    const e = (a) => transpileEmptyArgFunc(funcExpr, a);
+    const n = (a) => transpileNumArgFunc(funcExpr, a);
+    const s = (a) => transpileStringArgFunc(funcExpr, a);
+    switch (funcExpr.name) {
         case "inc_u":
-            return n((x)=>A.incU(x)
-            );
+            return n((x) => A.incU(x));
         case "tdec_u":
-            return n((x)=>A.tdecU(x)
-            );
+            return n((x) => A.tdecU(x));
         case "inc_b":
-            return n((x)=>A.incB(x)
-            );
+            return n((x) => A.incB(x));
         case "tdec_b":
-            return n((x)=>A.tdecB(x)
-            );
+            return n((x) => A.tdecB(x));
         case "read_b":
-            return n((x)=>A.readB(x)
-            );
+            return n((x) => A.readB(x));
         case "set_b":
-            return n((x)=>A.setB(x)
-            );
+            return n((x) => A.setB(x));
         case "inc_b2dx":
             return e(A.incB2DX());
         case "inc_b2dy":
@@ -842,31 +880,26 @@ function transpileFuncAPGMExpr(funcExpr) {
         case "halt_out":
             return e(A.haltOUT());
         case "output":
-            return s((x)=>A.output(x)
-            );
-        case "break":
-            {
-                if (funcExpr.args.length === 0) {
-                    return e(new BreakAPGLExpr(undefined));
-                } else {
-                    return n((x)=>new BreakAPGLExpr(x)
-                    );
-                }
+            return s((x) => A.output(x));
+        case "break": {
+            if (funcExpr.args.length === 0) {
+                return e(new BreakAPGLExpr(undefined));
+            } else {
+                return n((x) => new BreakAPGLExpr(x));
             }
-        case "repeat":
-            {
-                if (funcExpr.args.length !== 2) {
-                    throw Error('"repeat" takes two argments');
-                }
-                const n = funcExpr.args[0];
-                if (!(n instanceof NumberAPGMExpr)) {
-                    throw Error('first argment of "repeat" must be a number');
-                }
-                const expr = funcExpr.args[1];
-                const apgl = transpileAPGMExpr(expr);
-                return new SeqAPGLExpr(Array(n.value).fill(0).map(()=>apgl
-                ));
+        }
+        case "repeat": {
+            if (funcExpr.args.length !== 2) {
+                throw Error('"repeat" takes two argments');
             }
+            const n = funcExpr.args[0];
+            if (!(n instanceof NumberAPGMExpr)) {
+                throw Error('first argment of "repeat" must be a number');
+            }
+            const expr = funcExpr.args[1];
+            const apgl = transpileAPGMExpr(expr);
+            return new SeqAPGLExpr(Array(n.value).fill(0).map(() => apgl));
+        }
     }
     throw Error(`Unknown function: "${funcExpr.name}"`);
 }
@@ -876,17 +909,28 @@ function transpileAPGMExpr(expr) {
         return transpileFuncAPGMExpr(expr);
     } else if (expr instanceof IfAPGMExpr) {
         if (expr.modifier === "Z") {
-            return new IfAPGLExpr(t(expr.cond), t(expr.thenBody), expr.elseBody === undefined ? new SeqAPGLExpr([]) : t(expr.elseBody));
+            return new IfAPGLExpr(
+                t(expr.cond),
+                t(expr.thenBody),
+                expr.elseBody === undefined
+                    ? new SeqAPGLExpr([])
+                    : t(expr.elseBody),
+            );
         } else {
-            return new IfAPGLExpr(t(expr.cond), expr.elseBody === undefined ? new SeqAPGLExpr([]) : t(expr.elseBody), t(expr.thenBody));
+            return new IfAPGLExpr(
+                t(expr.cond),
+                expr.elseBody === undefined
+                    ? new SeqAPGLExpr([])
+                    : t(expr.elseBody),
+                t(expr.thenBody),
+            );
         }
     } else if (expr instanceof LoopAPGMExpr) {
         return new LoopAPGLExpr(t(expr.body));
     } else if (expr instanceof NumberAPGMExpr) {
         throw Error(`number is not allowed: ${expr.value}`);
     } else if (expr instanceof SeqAPGMExpr) {
-        return new SeqAPGLExpr(expr.exprs.map((x)=>t(x)
-        ));
+        return new SeqAPGLExpr(expr.exprs.map((x) => t(x)));
     } else if (expr instanceof StringAPGMExpr) {
         throw Error(`string is not allowed: ${expr.value}`);
     } else if (expr instanceof VarAPGMExpr) {
@@ -904,17 +948,21 @@ class Transpiler {
     id = 0;
     loopFinalStates = [];
     prefix = "STATE";
-    constructor(){
+    constructor() {
     }
     getFreshName() {
         this.id++;
         return `${this.prefix}_${this.id}`;
     }
-    emitLine({ currentState , prevOutput , nextState , actions  }) {
+    emitLine({ currentState, prevOutput, nextState, actions }) {
         if (actions.length === 0) {
             throw Error("action must be nonempty");
         }
-        this.lines.push(`${currentState}; ${prevOutput}; ${nextState}; ${actions.join(", ")}`);
+        this.lines.push(
+            `${currentState}; ${prevOutput}; ${nextState}; ${
+                actions.join(", ")
+            }`,
+        );
     }
     transition(current, next) {
         this.emitLine({
@@ -922,8 +970,8 @@ class Transpiler {
             prevOutput: "*",
             nextState: next,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
     }
     transpile(expr) {
@@ -936,8 +984,8 @@ class Transpiler {
             prevOutput: "*",
             nextState: endState,
             actions: [
-                "HALT_OUT"
-            ]
+                "HALT_OUT",
+            ],
         });
         return this.lines;
     }
@@ -963,22 +1011,30 @@ class Transpiler {
             currentState: state,
             prevOutput: "*",
             nextState: nextState,
-            actions: actionExpr.actions
+            actions: actionExpr.actions,
         });
         return nextState;
     }
     transpileSeqAPGLExpr(state, seqExpr) {
-        for (const expr of seqExpr.exprs){
+        for (const expr of seqExpr.exprs) {
             state = this.transpileExpr(state, expr);
         }
         return state;
     }
     transpileIfAPGLExpr(state, ifExpr) {
         if (isEmptyExpr(ifExpr.elseBody)) {
-            return this.transpileIfAPGLExprOnlyZ(state, ifExpr.cond, ifExpr.thenBody);
+            return this.transpileIfAPGLExprOnlyZ(
+                state,
+                ifExpr.cond,
+                ifExpr.thenBody,
+            );
         }
         if (isEmptyExpr(ifExpr.thenBody)) {
-            return this.transpileIfAPGLExprOnlyNZ(state, ifExpr.cond, ifExpr.elseBody);
+            return this.transpileIfAPGLExprOnlyNZ(
+                state,
+                ifExpr.cond,
+                ifExpr.elseBody,
+            );
         }
         const condEndState = this.transpileExpr(state, ifExpr.cond);
         const thenStartState = this.getFreshName() + "_IF_Z";
@@ -988,19 +1044,25 @@ class Transpiler {
             prevOutput: "Z",
             nextState: thenStartState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         this.emitLine({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: elseStartState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
-        const thenEndState = this.transpileExpr(thenStartState, ifExpr.thenBody);
-        const elseEndState = this.transpileExpr(elseStartState, ifExpr.elseBody);
+        const thenEndState = this.transpileExpr(
+            thenStartState,
+            ifExpr.thenBody,
+        );
+        const elseEndState = this.transpileExpr(
+            elseStartState,
+            ifExpr.elseBody,
+        );
         this.transition(thenEndState, elseEndState);
         return elseEndState;
     }
@@ -1013,16 +1075,16 @@ class Transpiler {
             prevOutput: "Z",
             nextState: thenStartState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         this.emitLine({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: endState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         return endState;
     }
@@ -1035,16 +1097,16 @@ class Transpiler {
             prevOutput: "Z",
             nextState: endState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         this.emitLine({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: bodyStartState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         return endState;
     }
@@ -1058,8 +1120,8 @@ class Transpiler {
             prevOutput: "*",
             nextState: state,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         return breakState;
     }
@@ -1072,16 +1134,16 @@ class Transpiler {
             prevOutput: "Z",
             nextState: whileExpr.modifier === "Z" ? bodyStartState : finalState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         this.emitLine({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: whileExpr.modifier === "Z" ? finalState : bodyStartState,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         this.loopFinalStates.push(finalState);
         const bodyEndState = this.transpileExpr(bodyStartState, whileExpr.body);
@@ -1091,8 +1153,8 @@ class Transpiler {
             prevOutput: "*",
             nextState: state,
             actions: [
-                "NOP"
-            ]
+                "NOP",
+            ],
         });
         return finalState;
     }
@@ -1101,15 +1163,20 @@ class Transpiler {
             throw Error("break level is less than 1");
         }
         if (breakExpr.level === undefined || breakExpr.level === 1) {
-            const breakState = this.loopFinalStates[this.loopFinalStates.length - 1];
+            const breakState =
+                this.loopFinalStates[this.loopFinalStates.length - 1];
             if (breakState === undefined) {
                 throw Error("break outside while or loop");
             }
             this.transition(state, breakState);
         } else {
-            const breakState = this.loopFinalStates[this.loopFinalStates.length - breakExpr.level];
+            const breakState = this.loopFinalStates[
+                this.loopFinalStates.length - breakExpr.level
+            ];
             if (breakState === undefined) {
-                throw Error("break level is greater than number of nest of while or loop");
+                throw Error(
+                    "break level is greater than number of nest of while or loop",
+                );
             }
             this.transition(state, breakState);
         }
@@ -1124,13 +1191,12 @@ class MacroExpander {
     count = 0;
     maxCount = 100000;
     main;
-    constructor(main){
+    constructor(main) {
         this.main = main;
-        this.macroMap = new Map(main.macros.map((m)=>[
-                m.name,
-                m
-            ]
-        ));
+        this.macroMap = new Map(main.macros.map((m) => [
+            m.name,
+            m,
+        ]));
     }
     expand() {
         return this.expandExpr(this.main.seqExpr);
@@ -1141,8 +1207,7 @@ class MacroExpander {
         }
         this.count++;
         try {
-            return expr.transform((x)=>this.expandOnce(x)
-            );
+            return expr.transform((x) => this.expandOnce(x));
         } catch (e) {
             throw e;
         }
@@ -1171,12 +1236,11 @@ class MacroExpander {
         if (exprs.length !== macro.args.length) {
             throw Error(`argment length mismatch: "${macro.name}"`);
         }
-        const map = new Map(macro.args.map((a, i)=>[
-                a.name,
-                exprs[i] ?? this.error()
-            ]
-        ));
-        return macro.body.transform((x)=>{
+        const map = new Map(macro.args.map((a, i) => [
+            a.name,
+            exprs[i] ?? this.error(),
+        ]));
+        return macro.body.transform((x) => {
             if (x instanceof VarAPGMExpr) {
                 const expr = map.get(x.name);
                 if (expr !== undefined) {
@@ -1208,10 +1272,9 @@ function integration1(str, log = false) {
     const apgs = transpileAPGL(apgl);
     const comment = [
         "# State    Input    Next state    Actions",
-        "# ---------------------------------------", 
+        "# ---------------------------------------",
     ];
-    const head = apgm.headers.map((x)=>x.toString()
-    );
+    const head = apgm.headers.map((x) => x.toString());
     return head.concat(comment, apgs);
 }
 export { integration1 as integration };

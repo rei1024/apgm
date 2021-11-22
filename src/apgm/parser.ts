@@ -1,5 +1,7 @@
 import { bnb } from "../deps.ts";
 
+import { naturalNumberParser } from "./parser/number.ts";
+
 import {
     APGMExpr,
     FuncAPGMExpr,
@@ -62,9 +64,11 @@ export function funcAPGMExpr(): bnb.Parser<FuncAPGMExpr> {
     });
 }
 
-export const numberAPGMExpr = bnb.match(/[0-9]+/).desc(["number"]).map((x) =>
-    new NumberAPGMExpr(Number(x))
-);
+export { naturalNumberParser };
+export const numberAPGMExpr: bnb.Parser<NumberAPGMExpr> = _.next(
+    naturalNumberParser.map((x) => new NumberAPGMExpr(x)),
+).skip(_);
+
 export const stringLit = _.next(bnb.text(`"`)).next(bnb.match(/[^"]*/)).skip(
     bnb.text(`"`),
 ).skip(_).desc(["string"]);
