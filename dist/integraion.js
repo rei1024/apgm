@@ -417,7 +417,7 @@ class Main {
         this.seqExpr = seqExpr;
         if (macros.length >= 1) {
             if (!(macros[0] instanceof Macro)) {
-                throw TypeError('internal error');
+                throw TypeError("internal error");
             }
         }
     }
