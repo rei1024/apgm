@@ -1,7 +1,7 @@
 import { APGMExpr } from "./core.ts";
 
 export class NumberAPGMExpr extends APGMExpr {
-    constructor(public value: number) {
+    constructor(public readonly value: number) {
         super();
     }
 

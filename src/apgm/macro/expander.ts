@@ -7,10 +7,10 @@ import {
 } from "../ast/mod.ts";
 
 export class MacroExpander {
-    private macroMap: Map<string, Macro>;
+    private readonly macroMap: Map<string, Macro>;
     private count: number = 0;
-    private maxCount: number = 100000;
-    public main: Main;
+    private readonly maxCount: number = 100000;
+    public readonly main: Main;
     constructor(main: Main) {
         this.main = main;
         this.macroMap = new Map(main.macros.map((m) => [m.name, m]));

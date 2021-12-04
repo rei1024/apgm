@@ -1,7 +1,7 @@
 import { APGMExpr } from "./core.ts";
 
 export class VarAPGMExpr extends APGMExpr {
-    constructor(public name: string) {
+    constructor(public readonly name: string) {
         super();
     }
 
