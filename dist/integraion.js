@@ -455,7 +455,7 @@ class NumberAPGMExpr extends APGMExpr {
         this.value = value;
     }
     transform(f) {
-        return f(new NumberAPGMExpr(this.value));
+        return f(this);
     }
 }
 class StringAPGMExpr extends APGMExpr {
@@ -465,7 +465,7 @@ class StringAPGMExpr extends APGMExpr {
         this.value = value;
     }
     transform(f) {
-        return f(new StringAPGMExpr(this.value));
+        return f(this);
     }
 }
 class SeqAPGMExpr extends APGMExpr {
@@ -1149,12 +1149,8 @@ class MacroExpander {
             throw Error("too many macro expansion");
         }
         this.count++;
-        try {
-            return expr.transform((x)=>this.expandOnce(x)
-            );
-        } catch (e) {
-            throw e;
-        }
+        return expr.transform((x)=>this.expandOnce(x)
+        );
     }
     expandOnce(x) {
         if (x instanceof FuncAPGMExpr) {
@@ -1188,10 +1184,10 @@ class MacroExpander {
         return macro.body.transform((x)=>{
             if (x instanceof VarAPGMExpr) {
                 const expr = map.get(x.name);
-                if (expr !== undefined) {
-                    return expr;
+                if (expr === undefined) {
+                    throw Error(`scope error: "${x.name}"`);
                 }
-                throw Error(`scope error "${x.name}"`);
+                return expr;
             } else {
                 return x;
             }

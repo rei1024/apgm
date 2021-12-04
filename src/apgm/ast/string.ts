@@ -6,6 +6,6 @@ export class StringAPGMExpr extends APGMExpr {
     }
 
     transform(f: (_: APGMExpr) => APGMExpr): APGMExpr {
-        return f(new StringAPGMExpr(this.value));
+        return f(this);
     }
 }

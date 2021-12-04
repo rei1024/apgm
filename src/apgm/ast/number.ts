@@ -6,6 +6,6 @@ export class NumberAPGMExpr extends APGMExpr {
     }
 
     transform(f: (_: APGMExpr) => APGMExpr): APGMExpr {
-        return f(new NumberAPGMExpr(this.value));
+        return f(this);
     }
 }
