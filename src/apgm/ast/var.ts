@@ -6,6 +6,6 @@ export class VarAPGMExpr extends APGMExpr {
     }
 
     transform(f: (_: APGMExpr) => APGMExpr): APGMExpr {
-        return f(new VarAPGMExpr(this.name));
+        return f(this);
     }
 }

@@ -486,7 +486,7 @@ class VarAPGMExpr extends APGMExpr {
         this.name = name;
     }
     transform(f) {
-        return f(new VarAPGMExpr(this.name));
+        return f(this);
     }
 }
 class WhileAPGMExpr extends APGMExpr {
