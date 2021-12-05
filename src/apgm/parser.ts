@@ -23,7 +23,7 @@ export const comment = bnb.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc(["comment"]);
 /** 空白 */
 export const _: bnb.Parser<undefined> = bnb.match(/\s*/).desc(["space"]).sepBy(
     comment,
-).map((x) => undefined);
+).map(() => undefined);
 
 export const someSpaces = bnb.match(/\s+/).desc(["space"]);
 
@@ -88,14 +88,17 @@ export const whileKeyword = bnb.choice(token("while_z"), token("while_nz")).map(
     (x) => x === "while_z" ? "Z" : "NZ",
 );
 
+const exprWithParen: bnb.Parser<APGMExpr> = token("(").next(
+    bnb.lazy(() => apgmExpr()),
+).skip(token(")"));
+
 export function whileAPGMExpr() {
     return whileKeyword.chain((mod) => {
-        return token("(").next(bnb.lazy(() => apgmExpr())).skip(token(")"))
-            .chain((cond) => {
-                return bnb.lazy(() => apgmExpr()).map((body) =>
-                    new WhileAPGMExpr(mod, cond, body)
-                );
-            });
+        return exprWithParen.chain((cond) => {
+            return bnb.lazy(() => apgmExpr()).map((body) =>
+                new WhileAPGMExpr(mod, cond, body)
+            );
+        });
     });
 }
 
@@ -111,17 +114,16 @@ export const ifKeyword = bnb.choice(token("if_z"), token("if_nz")).map((x) =>
 
 export function ifAPGMExpr() {
     return ifKeyword.chain((mod) => {
-        return token("(").next(bnb.lazy(() => apgmExpr())).skip(token(")"))
-            .chain((cond) => {
-                return bnb.lazy(() => apgmExpr()).chain((body) => {
-                    return bnb.choice(
-                        token("else").next(bnb.lazy(() => apgmExpr())),
-                        bnb.ok(undefined),
-                    ).map((eleBody) => {
-                        return new IfAPGMExpr(mod, cond, body, eleBody);
-                    });
+        return exprWithParen.chain((cond) => {
+            return bnb.lazy(() => apgmExpr()).chain((body) => {
+                return bnb.choice(
+                    token("else").next(bnb.lazy(() => apgmExpr())),
+                    bnb.ok(undefined),
+                ).map((elseBody) => {
+                    return new IfAPGMExpr(mod, cond, body, elseBody);
                 });
             });
+        });
     });
 }
 

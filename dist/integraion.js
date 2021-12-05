@@ -508,7 +508,7 @@ const comment = mod1.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc([
 ]);
 const _ = mod1.match(/\s*/).desc([
     "space"
-]).sepBy(comment).map((x)=>undefined
+]).sepBy(comment).map(()=>undefined
 );
 const someSpaces = mod1.match(/\s+/).desc([
     "space"
@@ -555,10 +555,11 @@ function seqAPGMExpr() {
 }
 const whileKeyword = mod1.choice(token("while_z"), token("while_nz")).map((x)=>x === "while_z" ? "Z" : "NZ"
 );
+const exprWithParen = token("(").next(mod1.lazy(()=>apgmExpr()
+)).skip(token(")"));
 function whileAPGMExpr() {
     return whileKeyword.chain((mod)=>{
-        return token("(").next(mod1.lazy(()=>apgmExpr()
-        )).skip(token(")")).chain((cond)=>{
+        return exprWithParen.chain((cond)=>{
             return mod1.lazy(()=>apgmExpr()
             ).map((body)=>new WhileAPGMExpr(mod, cond, body)
             );
@@ -574,13 +575,12 @@ const ifKeyword = mod1.choice(token("if_z"), token("if_nz")).map((x)=>x === "if_
 );
 function ifAPGMExpr() {
     return ifKeyword.chain((mod)=>{
-        return token("(").next(mod1.lazy(()=>apgmExpr()
-        )).skip(token(")")).chain((cond)=>{
+        return exprWithParen.chain((cond)=>{
             return mod1.lazy(()=>apgmExpr()
             ).chain((body)=>{
                 return mod1.choice(token("else").next(mod1.lazy(()=>apgmExpr()
-                )), mod1.ok(undefined)).map((eleBody)=>{
-                    return new IfAPGMExpr(mod, cond, body, eleBody);
+                )), mod1.ok(undefined)).map((elseBody)=>{
+                    return new IfAPGMExpr(mod, cond, body, elseBody);
                 });
             });
         });
