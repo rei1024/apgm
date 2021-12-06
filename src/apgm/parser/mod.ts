@@ -1,7 +1,7 @@
-import { bnb } from "../deps.ts";
+import { bnb } from "../../deps.ts";
 
-import { naturalNumberParser } from "./parser/number.ts";
-import { parsePretty } from "./parser/parsePretty.ts";
+import { naturalNumberParser } from "./number.ts";
+import { parsePretty } from "./parsePretty.ts";
 
 import {
     APGMExpr,
@@ -16,7 +16,7 @@ import {
     StringAPGMExpr,
     VarAPGMExpr,
     WhileAPGMExpr,
-} from "./ast/mod.ts";
+} from "../ast/mod.ts";
 
 // https://stackoverflow.com/questions/16160190/regular-expression-to-find-c-style-block-comments#:~:text=35-,Try%20using,-%5C/%5C*(%5C*(%3F!%5C/)%7C%5B%5E*%5D)*%5C*%5C/
 export const comment = bnb.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc(["comment"]);

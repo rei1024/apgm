@@ -1,4 +1,4 @@
-import { parseMain } from "../apgm/parser.ts";
+import { parseMain } from "../apgm/parser/mod.ts";
 import { transpileAPGMExpr } from "../apgm_to_apgl/transpiler.ts";
 import { transpileAPGL } from "../apgl_to_apgsembly/mod.ts";
 import { expand } from "../apgm/macro/expander.ts";
