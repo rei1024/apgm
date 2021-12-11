@@ -34,6 +34,7 @@ if (!($error instanceof HTMLElement)) {
 
 $compile.addEventListener("click", () => {
     $output.value = "";
+    $input.classList.remove('is-invalid');
     try {
         /**
          * @type {string}
@@ -44,11 +45,12 @@ $compile.addEventListener("click", () => {
         $output.value = result;
     } catch (e) {
         if (!(e instanceof Error)) {
-            e = new Error('unkown error');
+            e = new Error("unkown error");
         }
         $error.textContent = e.message;
         $error.style.display = "block";
         $copy.disabled = true;
+        $input.classList.add('is-invalid');
     }
 });
 
