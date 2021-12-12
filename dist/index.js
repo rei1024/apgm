@@ -34,7 +34,7 @@ if (!($error instanceof HTMLElement)) {
 
 $compile.addEventListener("click", () => {
     $output.value = "";
-    $input.classList.remove('is-invalid');
+    $input.classList.remove("is-invalid");
     try {
         /**
          * @type {string}
@@ -50,7 +50,7 @@ $compile.addEventListener("click", () => {
         $error.textContent = e.message;
         $error.style.display = "block";
         $copy.disabled = true;
-        $input.classList.add('is-invalid');
+        $input.classList.add("is-invalid");
     }
 });
 
