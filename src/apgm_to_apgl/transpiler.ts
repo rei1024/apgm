@@ -152,16 +152,12 @@ export function transpileAPGMExpr(e: APGMExpr): APGLExpr {
             return new IfAPGLExpr(
                 t(e.cond),
                 t(e.thenBody),
-                e.elseBody === undefined
-                    ? new SeqAPGLExpr([])
-                    : t(e.elseBody),
+                e.elseBody === undefined ? new SeqAPGLExpr([]) : t(e.elseBody),
             );
         } else {
             return new IfAPGLExpr(
                 t(e.cond),
-                e.elseBody === undefined
-                    ? new SeqAPGLExpr([])
-                    : t(e.elseBody),
+                e.elseBody === undefined ? new SeqAPGLExpr([]) : t(e.elseBody),
                 t(e.thenBody),
             );
         }

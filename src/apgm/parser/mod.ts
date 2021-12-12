@@ -76,7 +76,9 @@ export const numberAPGMExpr: bnb.Parser<NumberAPGMExpr> = _.next(
     naturalNumberParser.map((x) => new NumberAPGMExpr(x)),
 ).skip(_);
 
-export const stringLit: bnb.Parser<string> = _.next(bnb.text(`"`)).next(bnb.match(/[^"]*/)).skip(
+export const stringLit: bnb.Parser<string> = _.next(bnb.text(`"`)).next(
+    bnb.match(/[^"]*/),
+).skip(
     bnb.text(`"`),
 ).skip(_).desc(["string"]);
 export const stringAPGMExpr = stringLit.map((x) => new StringAPGMExpr(x));
