@@ -16,9 +16,9 @@ export class MacroExpander {
         this.main = main;
         this.macroMap = new Map(main.macros.map((m) => [m.name, m]));
         if (this.macroMap.size < main.macros.length) {
-            const ds = dups(main.macros.map(x => x.name));
+            const ds = dups(main.macros.map((x) => x.name));
             const d = ds[0];
-            throw Error("duplicate definition of macro: \"" + d + "\"");
+            throw Error('duplicate definition of macro: "' + d + '"');
         }
     }
 

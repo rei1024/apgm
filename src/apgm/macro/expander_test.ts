@@ -51,7 +51,11 @@ test("duplicate macro", () => {
     const body = new SeqAPGMExpr([
         new FuncAPGMExpr("f!", [new StringAPGMExpr("3")]),
     ]);
-    assertThrows(() => {
-        expand(new Main(macros, [], body));
-    }, Error, 'duplicate definition of macro: "f!"');
+    assertThrows(
+        () => {
+            expand(new Main(macros, [], body));
+        },
+        Error,
+        'duplicate definition of macro: "f!"',
+    );
 });
