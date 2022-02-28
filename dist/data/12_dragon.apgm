@@ -4,6 +4,10 @@
 */
 
 /*
+  Lindenmayer systems
+  axiom: FX
+  rules: X -> X+YF+, Y -> -FX-Y
+
   Symbols are encoded by the number of consecutive 1s
   F + - X Y
   1 2 3 4 5
