@@ -825,27 +825,27 @@ class A {
 }
 function transpileEmptyArgFunc(funcExpr, expr) {
     if (funcExpr.args.length !== 0) {
-        throw Error(`argument given to "${funcExpr.name}"`);
+        throw Error(`argument given to "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     return expr;
 }
 function transpileNumArgFunc(funcExpr, expr) {
     if (funcExpr.args.length !== 1) {
-        throw Error(`number of argument is not 1: "${funcExpr.name}"`);
+        throw Error(`number of argument is not 1: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     const arg = funcExpr.args[0];
     if (!(arg instanceof NumberAPGMExpr)) {
-        throw Error(`argument is not a number: "${funcExpr.name}"`);
+        throw Error(`argument is not a number: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     return expr(arg.value);
 }
 function transpileStringArgFunc(funcExpr, expr) {
     if (funcExpr.args.length !== 1) {
-        throw Error(`number of argument is not 1: "${funcExpr.name}"`);
+        throw Error(`number of argument is not 1: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     const arg = funcExpr.args[0];
     if (!(arg instanceof StringAPGMExpr)) {
-        throw Error(`argument is not a number: "${funcExpr.name}"`);
+        throw Error(`argument is not a number: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     return expr(arg.value);
 }
@@ -922,11 +922,11 @@ function transpileFuncAPGMExpr(funcExpr) {
         case "repeat":
             {
                 if (funcExpr.args.length !== 2) {
-                    throw Error('"repeat" takes two arguments');
+                    throw Error(`"repeat" takes two arguments${formatLocationAt(funcExpr.location)}`);
                 }
                 const n = funcExpr.args[0];
                 if (!(n instanceof NumberAPGMExpr)) {
-                    throw Error('first argument of "repeat" must be a number');
+                    throw Error(`first argument of "repeat" must be a number${formatLocationAt(funcExpr.location)}`);
                 }
                 const expr = funcExpr.args[1];
                 const apgl = transpileAPGMExpr(expr);
