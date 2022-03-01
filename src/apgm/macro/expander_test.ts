@@ -20,7 +20,7 @@ test("expand", () => {
             "f!",
             [new VarAPGMExpr("x")],
             new FuncAPGMExpr("output", [new VarAPGMExpr("x")], undefined),
-            undefined
+            undefined,
         ),
     ];
     const body = new SeqAPGMExpr([
@@ -42,13 +42,13 @@ test("duplicate macro", () => {
             "f!",
             [new VarAPGMExpr("x")],
             new FuncAPGMExpr("output", [new VarAPGMExpr("x")], undefined),
-            undefined
+            undefined,
         ),
         new Macro(
             "f!",
             [new VarAPGMExpr("x")],
             new FuncAPGMExpr("output", [new VarAPGMExpr("x")], undefined),
-            undefined
+            undefined,
         ),
     ];
     const body = new SeqAPGMExpr([

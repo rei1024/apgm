@@ -26,7 +26,9 @@ export function formatLocation(location: APGMSourceLocation): string {
     return `line ${location.line} column ${location.column}`;
 }
 
-export function formatLocationAt(location: APGMSourceLocation | undefined): string {
+export function formatLocationAt(
+    location: APGMSourceLocation | undefined,
+): string {
     if (location !== undefined) {
         return ` at line ${location.line} column ${location.column}`;
     } else {

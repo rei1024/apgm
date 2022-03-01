@@ -20,8 +20,13 @@ export class MacroExpander {
         if (this.macroMap.size < main.macros.length) {
             const ds = dups(main.macros.map((x) => x.name));
             const d = ds[0];
-            const location = main.macros.slice().reverse().find(x => x.name === d)?.location;
-            throw Error('duplicate definition of macro: "' + d + '"' + formatLocationAt(location));
+            const location = main.macros.slice().reverse().find((x) =>
+                x.name === d
+            )?.location;
+            throw Error(
+                'duplicate definition of macro: "' + d + '"' +
+                    formatLocationAt(location),
+            );
         }
     }
 
@@ -63,7 +68,11 @@ export class MacroExpander {
     replaceVarInBoby(macro: Macro, funcExpr: FuncAPGMExpr): APGMExpr {
         const exprs = funcExpr.args;
         if (exprs.length !== macro.args.length) {
-            throw Error(`argument length mismatch: "${macro.name}"${formatLocationAt(funcExpr.location)}`);
+            throw Error(
+                `argument length mismatch: "${macro.name}"${
+                    formatLocationAt(funcExpr.location)
+                }`,
+            );
         }
         const map = new Map(
             macro.args.map((a, i) => [a.name, exprs[i] ?? this.error()]),
@@ -72,7 +81,11 @@ export class MacroExpander {
             if (x instanceof VarAPGMExpr) {
                 const expr = map.get(x.name);
                 if (expr === undefined) {
-                    throw Error(`scope error: "${x.name}"${formatLocationAt(funcExpr.location)}`);
+                    throw Error(
+                        `scope error: "${x.name}"${
+                            formatLocationAt(funcExpr.location)
+                        }`,
+                    );
                 }
                 return expr;
             } else {
