@@ -403,17 +403,26 @@ function parsePretty(parser, source) {
 class APGMExpr {
     constructor(){}
 }
+function formatLocationAt(location1) {
+    if (location1 !== undefined) {
+        return ` at line ${location1.line} column ${location1.column}`;
+    } else {
+        return "";
+    }
+}
 class FuncAPGMExpr extends APGMExpr {
     name;
     args;
+    location;
     transform(f) {
         return f(new FuncAPGMExpr(this.name, this.args.map((x)=>x.transform(f)
-        )));
+        ), this.location));
     }
-    constructor(name, args){
+    constructor(name, args, location2){
         super();
         this.name = name;
         this.args = args;
+        this.location = location2;
     }
 }
 class IfAPGMExpr extends APGMExpr {
@@ -446,10 +455,12 @@ class Macro {
     name;
     args;
     body;
-    constructor(name, args, body){
+    location;
+    constructor(name, args, body, location3){
         this.name = name;
         this.args = args;
         this.body = body;
+        this.location = location3;
     }
 }
 class Main {
@@ -569,10 +580,12 @@ const semicolon = token(";").desc([
 const varAPGMExpr = identifier.map((x)=>new VarAPGMExpr(x)
 );
 function funcAPGMExpr() {
-    return mod.choice(macroIdentifier, identifier).chain((ident)=>{
-        return mod.lazy(()=>apgmExpr()
-        ).sepBy(comma).wrap(leftParen, rightParen).map((args)=>{
-            return new FuncAPGMExpr(ident, args);
+    return mod.location.chain((location4)=>{
+        return mod.choice(macroIdentifier, identifier).chain((ident)=>{
+            return mod.lazy(()=>apgmExpr()
+            ).sepBy(comma).wrap(leftParen, rightParen).map((args)=>{
+                return new FuncAPGMExpr(ident, args, location4);
+            });
         });
     });
 }
@@ -625,11 +638,15 @@ function ifAPGMExpr() {
     });
 }
 function macro() {
-    return _.next(mod.text("macro")).skip(someSpaces).next(macroIdentifier).chain((ident)=>{
-        return leftParen.next(varAPGMExpr.sepBy(comma).skip(rightParen)).chain((args)=>{
-            return mod.lazy(()=>apgmExpr()
-            ).map((body)=>{
-                return new Macro(ident, args, body);
+    return _.chain((_)=>{
+        return mod.location.chain((location5)=>{
+            return mod.text("macro").skip(someSpaces).next(macroIdentifier).chain((ident)=>{
+                return leftParen.next(varAPGMExpr.sepBy(comma).skip(rightParen)).chain((args)=>{
+                    return mod.lazy(()=>apgmExpr()
+                    ).map((body)=>{
+                        return new Macro(ident, args, body, location5);
+                    });
+                });
             });
         });
     });
@@ -712,6 +729,9 @@ class BreakAPGLExpr extends APGLExpr {
     constructor(level){
         super();
         this.level = level;
+        if (level !== undefined && level < 1) {
+            throw Error("break level is less than 1");
+        }
     }
 }
 class A {
@@ -1192,7 +1212,9 @@ class MacroExpander {
             const ds = dups(main1.macros.map((x)=>x.name
             ));
             const d = ds[0];
-            throw Error('duplicate definition of macro: "' + d + '"');
+            const location6 = main1.macros.slice().reverse().find((x)=>x.name === d
+            )?.location;
+            throw Error('duplicate definition of macro: "' + d + '"' + formatLocationAt(location6));
         }
     }
     expand() {
@@ -1217,7 +1239,7 @@ class MacroExpander {
         if (this.macroMap.has(funcExpr.name)) {
             const macro1 = this.macroMap.get(funcExpr.name);
             if (macro1 === undefined) throw Error("internal error");
-            const expanded = this.replaceVarInBoby(macro1, funcExpr.args);
+            const expanded = this.replaceVarInBoby(macro1, funcExpr);
             return this.expandExpr(expanded);
         } else {
             return funcExpr;
@@ -1226,9 +1248,10 @@ class MacroExpander {
     error() {
         throw Error("Internal error");
     }
-    replaceVarInBoby(macro2, exprs) {
+    replaceVarInBoby(macro2, funcExpr) {
+        const exprs = funcExpr.args;
         if (exprs.length !== macro2.args.length) {
-            throw Error(`argment length mismatch: "${macro2.name}"`);
+            throw Error(`argument length mismatch: "${macro2.name}"${formatLocationAt(funcExpr.location)}`);
         }
         const map = new Map(macro2.args.map((a, i)=>[
                 a.name,
@@ -1239,7 +1262,7 @@ class MacroExpander {
             if (x instanceof VarAPGMExpr) {
                 const expr = map.get(x.name);
                 if (expr === undefined) {
-                    throw Error(`scope error: "${x.name}"`);
+                    throw Error(`scope error: "${x.name}"${formatLocationAt(funcExpr.location)}`);
                 }
                 return expr;
             } else {
