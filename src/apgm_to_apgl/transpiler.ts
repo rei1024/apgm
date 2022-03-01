@@ -1,5 +1,6 @@
 import {
     APGMExpr,
+    formatLocationAt,
     FuncAPGMExpr,
     IfAPGMExpr,
     LoopAPGMExpr,
@@ -9,7 +10,6 @@ import {
     StringAPGMExpr,
     VarAPGMExpr,
     WhileAPGMExpr,
-    formatLocationAt,
 } from "../apgm/ast/mod.ts";
 
 import {
@@ -141,7 +141,11 @@ export function transpileFuncAPGMExpr(funcExpr: FuncAPGMExpr): APGLExpr {
         }
     }
 
-    throw Error(`Unknown function: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
+    throw Error(
+        `Unknown function: "${funcExpr.name}"${
+            formatLocationAt(funcExpr.location)
+        }`,
+    );
 }
 
 export function transpileAPGMExpr(e: APGMExpr): APGLExpr {
