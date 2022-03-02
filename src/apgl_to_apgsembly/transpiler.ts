@@ -12,17 +12,23 @@ function isEmptyExpr(expr: APGLExpr) {
     return expr instanceof SeqAPGLExpr && expr.exprs.length === 0;
 }
 
+export interface TranspilerOptions {
+    prefix?: string;
+}
+
 export class Transpiler {
     private lines: string[] = [];
     private id: number = 0;
     private loopFinalStates: string[] = [];
-    private prefix = "STATE";
-    constructor() {
+    private prefix: string;
+
+    constructor(options: TranspilerOptions = {}) {
+        this.prefix = options.prefix ?? "STATE_";
     }
 
     getFreshName() {
         this.id++;
-        return `${this.prefix}_${this.id}`;
+        return `${this.prefix}${this.id}`;
     }
 
     emitLine(
@@ -269,6 +275,9 @@ export class Transpiler {
     }
 }
 
-export function transpileAPGL(expr: APGLExpr): string[] {
-    return new Transpiler().transpile(expr);
+export function transpileAPGL(
+    expr: APGLExpr,
+    options: TranspilerOptions = {},
+): string[] {
+    return new Transpiler(options).transpile(expr);
 }

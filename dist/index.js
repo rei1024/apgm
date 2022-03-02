@@ -32,14 +32,24 @@ if (!($error instanceof HTMLElement)) {
     throw Error("$error");
 }
 
+const $prefix_input = document.querySelector("#prefix_input");
+if (!($prefix_input instanceof HTMLInputElement)) {
+    throw Error("$prefix_input");
+}
+
 $compile.addEventListener("click", () => {
     $output.value = "";
     $input.classList.remove("is-invalid");
     try {
+        const options = {};
+        if ($prefix_input.value.trim() !== "") {
+            options.prefix = $prefix_input.value.trim();
+        }
+
         /**
          * @type {string}
          */
-        const result = integration($input.value).join("\n");
+        const result = integration($input.value, options).join("\n");
         $copy.disabled = false;
         $error.style.display = "none";
         $output.value = result;

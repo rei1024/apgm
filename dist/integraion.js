@@ -969,11 +969,13 @@ class Transpiler {
     lines = [];
     id = 0;
     loopFinalStates = [];
-    prefix = "STATE";
-    constructor(){}
+    prefix;
+    constructor(options = {}){
+        this.prefix = options.prefix ?? "STATE_";
+    }
     getFreshName() {
         this.id++;
-        return `${this.prefix}_${this.id}`;
+        return `${this.prefix}${this.id}`;
     }
     emitLine({ currentState , prevOutput , nextState , actions  }) {
         if (actions.length === 0) {
@@ -1181,8 +1183,8 @@ class Transpiler {
         return this.getFreshName() + "_BREAK_UNUSED";
     }
 }
-function transpileAPGL(expr) {
-    return new Transpiler().transpile(expr);
+function transpileAPGL(expr, options = {}) {
+    return new Transpiler(options).transpile(expr);
 }
 function dups(as) {
     const set = new Set();
@@ -1274,7 +1276,7 @@ class MacroExpander {
 function expand(main2) {
     return new MacroExpander(main2).expand();
 }
-function integration(str, log = false) {
+function integration(str, options = {}, log = false) {
     const apgm = parseMain(str);
     if (log) {
         console.log("apgm", JSON.stringify(apgm, null, "  "));
@@ -1287,7 +1289,7 @@ function integration(str, log = false) {
     if (log) {
         console.log("apgl", JSON.stringify(apgl, null, "  "));
     }
-    const apgs = transpileAPGL(apgl);
+    const apgs = transpileAPGL(apgl, options);
     const comment1 = [
         "# State    Input    Next state    Actions",
         "# ---------------------------------------", 
