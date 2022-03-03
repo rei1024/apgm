@@ -58,6 +58,21 @@ test("optimize three inc", () => {
     assertEquals(optimize(before), after);
 });
 
+test("optimize four inc", () => {
+    const before = new SeqAPGLExpr([
+        new ActionAPGLExpr(["INC U1", "NOP"]),
+        new ActionAPGLExpr(["INC U2", "NOP"]),
+        new ActionAPGLExpr(["INC U2", "NOP"]),
+        new ActionAPGLExpr(["INC U3", "NOP"]),
+    ]);
+
+    const after = new SeqAPGLExpr([
+        new ActionAPGLExpr(["INC U1", "INC U2", "NOP"]),
+        new ActionAPGLExpr(["INC U2", "INC U3", "NOP"]),
+    ]);
+    assertEquals(optimize(before), after);
+});
+
 test("optimize two tdec", () => {
     const before = new SeqAPGLExpr([
         new ActionAPGLExpr(["TDEC U1", "NOP"]),
