@@ -36,6 +36,14 @@ export const identifierOnly: bnb.Parser<string> = bnb.match(identifierRexExp)
     .desc(["identifier"]);
 
 export const identifier: bnb.Parser<string> = _.next(identifierOnly).skip(_);
+export const identifierWithLocation: bnb.Parser<[string, bnb.SourceLocation]> =
+    _.chain(() => {
+        return bnb.location.chain((loc) => {
+            return identifierOnly.skip(_).map((ident) => {
+                return [ident, loc];
+            });
+        });
+    });
 
 const macroIdentifierRegExp = /[a-zA-Z_][a-zA-Z_0-9]*!/u;
 
@@ -56,7 +64,9 @@ export const rightParen = token(")").desc(["`)`"]);
 /** `;` */
 export const semicolon = token(";").desc(["`;`"]);
 
-export const varAPGMExpr = identifier.map((x) => new VarAPGMExpr(x));
+export const varAPGMExpr = identifierWithLocation.map((x) =>
+    new VarAPGMExpr(x[0], x[1])
+);
 
 export function funcAPGMExpr(): bnb.Parser<FuncAPGMExpr> {
     return _.next(bnb.location).chain((location) => {
