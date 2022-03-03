@@ -1,10 +1,6 @@
 import { optimize } from "./mod.ts";
 import { assertEquals, test } from "../../deps_test.ts";
-import {
-    ActionAPGLExpr,
-    LoopAPGLExpr,
-    SeqAPGLExpr,
-} from "../ast/mod.ts";
+import { ActionAPGLExpr, LoopAPGLExpr, SeqAPGLExpr } from "../ast/mod.ts";
 
 test("optimize empty", () => {
     const before = new SeqAPGLExpr([]);
