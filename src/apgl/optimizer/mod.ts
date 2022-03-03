@@ -1,10 +1,5 @@
 import { ActionAPGLExpr, APGLExpr, SeqAPGLExpr } from "../ast/mod.ts";
-import {
-    Action,
-    HaltOutAction,
-    NopAction,
-    parseAction,
-} from "../../deps.ts";
+import { Action, HaltOutAction, NopAction, parseAction } from "../../deps.ts";
 
 /**
  * 最適化
