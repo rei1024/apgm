@@ -68,7 +68,7 @@ function transpileStringArgFunc(
     const arg = funcExpr.args[0];
     if (!(arg instanceof StringAPGMExpr)) {
         throw Error(
-            `argument is not a number: "${funcExpr.name}"${
+            `argument is not a string: "${funcExpr.name}"${
                 formatLocationAt(funcExpr.location)
             }`,
         );
