@@ -1511,15 +1511,19 @@ class FuncAPGMExpr extends APGMExpr {
     name;
     args;
     location;
-    transform(f) {
-        return f(new FuncAPGMExpr(this.name, this.args.map((x)=>x.transform(f)
-        ), this.location));
-    }
     constructor(name, args, location2){
         super();
         this.name = name;
         this.args = args;
         this.location = location2;
+    }
+    transform(f) {
+        return f(new FuncAPGMExpr(this.name, this.args.map((x)=>x.transform(f)
+        ), this.location));
+    }
+    pretty() {
+        return `${this.name}(${this.args.map((x)=>x.pretty()
+        ).join(", ")})`;
     }
 }
 class IfAPGMExpr extends APGMExpr {
@@ -1537,6 +1541,9 @@ class IfAPGMExpr extends APGMExpr {
     transform(f) {
         return f(new IfAPGMExpr(this.modifier, this.cond.transform(f), this.thenBody.transform(f), this.elseBody !== undefined ? this.elseBody.transform(f) : undefined));
     }
+    pretty() {
+        return `if_${this.modifier === "Z" ? "z" : "nz"}(${this.cond.pretty()}) ${this.thenBody.pretty()}` + this.elseBody === undefined ? `` : ` else ${this.elseBody?.pretty()}`;
+    }
 }
 class LoopAPGMExpr extends APGMExpr {
     body;
@@ -1546,6 +1553,9 @@ class LoopAPGMExpr extends APGMExpr {
     }
     transform(f) {
         return f(new LoopAPGMExpr(this.body.transform(f)));
+    }
+    pretty() {
+        return `loop ${this.body.pretty()}`;
     }
 }
 class Macro {
@@ -1596,6 +1606,9 @@ class NumberAPGMExpr extends APGMExpr {
     transform(f) {
         return f(this);
     }
+    pretty() {
+        return this.value.toString();
+    }
 }
 class StringAPGMExpr extends APGMExpr {
     value;
@@ -1605,6 +1618,9 @@ class StringAPGMExpr extends APGMExpr {
     }
     transform(f) {
         return f(this);
+    }
+    pretty() {
+        return this.value;
     }
 }
 class SeqAPGMExpr extends APGMExpr {
@@ -1617,6 +1633,10 @@ class SeqAPGMExpr extends APGMExpr {
         return f(new SeqAPGMExpr(this.exprs.map((x)=>x.transform(f)
         )));
     }
+    pretty() {
+        return `{${this.exprs.map((x)=>x.pretty() + "; "
+        ).join("")}}`;
+    }
 }
 class VarAPGMExpr extends APGMExpr {
     name;
@@ -1626,6 +1646,9 @@ class VarAPGMExpr extends APGMExpr {
     }
     transform(f) {
         return f(this);
+    }
+    pretty() {
+        return this.name;
     }
 }
 class WhileAPGMExpr extends APGMExpr {
@@ -1640,6 +1663,9 @@ class WhileAPGMExpr extends APGMExpr {
     }
     transform(f) {
         return f(new WhileAPGMExpr(this.modifier, this.cond.transform(f), this.body.transform(f)));
+    }
+    pretty() {
+        return `while_${this.modifier === "Z" ? "z" : "nz"}(${this.cond.pretty()}) ${this.body.pretty()}`;
     }
 }
 const comment = mod.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc([]);
@@ -1677,7 +1703,7 @@ const semicolon = token(";").desc([
 const varAPGMExpr = identifier.map((x)=>new VarAPGMExpr(x)
 );
 function funcAPGMExpr() {
-    return mod.location.chain((location4)=>{
+    return _.next(mod.location).chain((location4)=>{
         return mod.choice(macroIdentifier, identifier).chain((ident)=>{
             return mod.lazy(()=>apgmExpr()
             ).sepBy(comma).wrap(leftParen, rightParen).map((args)=>{
@@ -1735,14 +1761,18 @@ function ifAPGMExpr() {
     });
 }
 function macro() {
-    return _.chain((_)=>{
+    const macroKeyword = _.chain((_)=>{
         return mod.location.chain((location5)=>{
-            return mod.text("macro").skip(someSpaces).next(macroIdentifier).chain((ident)=>{
-                return leftParen.next(varAPGMExpr.sepBy(comma).skip(rightParen)).chain((args)=>{
-                    return mod.lazy(()=>apgmExpr()
-                    ).map((body)=>{
-                        return new Macro(ident, args, body, location5);
-                    });
+            return mod.text("macro").next(someSpaces).map((_)=>location5
+            );
+        });
+    });
+    return macroKeyword.chain((location6)=>{
+        return macroIdentifier.chain((ident)=>{
+            return varAPGMExpr.sepBy(comma).wrap(leftParen, rightParen).chain((args)=>{
+                return mod.lazy(()=>apgmExpr()
+                ).map((body)=>{
+                    return new Macro(ident, args, body, location6);
                 });
             });
         });
@@ -2340,9 +2370,9 @@ class MacroExpander {
             const ds = dups(main1.macros.map((x)=>x.name
             ));
             const d = ds[0];
-            const location6 = main1.macros.slice().reverse().find((x)=>x.name === d
+            const location7 = main1.macros.slice().reverse().find((x)=>x.name === d
             )?.location;
-            throw Error('duplicate definition of macro: "' + d + '"' + formatLocationAt(location6));
+            throw Error('duplicate definition of macro: "' + d + '"' + formatLocationAt(location7));
         }
     }
     expand() {

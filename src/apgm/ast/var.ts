@@ -8,4 +8,8 @@ export class VarAPGMExpr extends APGMExpr {
     transform(f: (_: APGMExpr) => APGMExpr): APGMExpr {
         return f(this);
     }
+
+    pretty(): string {
+        return this.name;
+    }
 }
