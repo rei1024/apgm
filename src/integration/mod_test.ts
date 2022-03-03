@@ -15,6 +15,39 @@ test("integration 0", () => {
     ]);
 });
 
+test("integration optimize", () => {
+    const src = `
+    inc_u(1);
+    inc_u(2);
+    `;
+    const res = integration(src);
+    assertEquals(res, [
+        "# State    Input    Next state    Actions",
+        "# ---------------------------------------",
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; INC U1, INC U2, NOP",
+        "STATE_2; *; STATE_2; HALT_OUT",
+    ]);
+});
+
+test("integration optimize loop", () => {
+    const src = `
+    loop {
+        inc_u(1);
+        inc_u(2);
+    }
+    `;
+    const res = integration(src);
+    assertEquals(res, [
+        "# State    Input    Next state    Actions",
+        "# ---------------------------------------",
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_3; INC U1, INC U2, NOP",
+        "STATE_3; *; STATE_1_INITIAL; NOP",
+        "STATE_2_LOOP_BREAK; *; STATE_2_LOOP_BREAK; HALT_OUT",
+    ]);
+});
+
 test("integration 1 macro", () => {
     const src = `
     macro f!(x) {
