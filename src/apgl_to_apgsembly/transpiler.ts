@@ -116,7 +116,14 @@ export class Transpiler {
 
     transpileSeqAPGLExpr(ctx: Context, seqExpr: SeqAPGLExpr): string {
         if (seqExpr.exprs.length === 0) {
-            return ctx.output ?? ctx.input;
+            if (ctx.output !== undefined) {
+                if (ctx.output !== ctx.input) {
+                    this.emitTransition(ctx.input, ctx.output);
+                }
+                return ctx.output;
+            } else {
+                return ctx.input;
+            }
         }
 
         let state = ctx.input;
@@ -343,7 +350,7 @@ export class Transpiler {
             ];
             if (breakState === undefined) {
                 throw Error(
-                    "break level is greater than number of nest of while or loop",
+                    "break level is greater than number of nests of while or loop",
                 );
             }
             if (ctx.input !== breakState) {

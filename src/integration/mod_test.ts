@@ -148,6 +148,13 @@ test("integration break(2)", () => {
     `;
 
     const res = integration(src);
+    assertEquals(res, [
+        "# State    Input    Next state    Actions",
+        "# ---------------------------------------",
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_END; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
 });
 
 test("integration header", () => {

@@ -60,7 +60,7 @@ export class MacroExpander {
                 x.name === d
             )?.location;
             throw Error(
-                'duplicate definition of macro: "' + d + '"' +
+                `There is a macro with the same name: "${d}"` +
                     formatLocationAt(location),
             );
         }

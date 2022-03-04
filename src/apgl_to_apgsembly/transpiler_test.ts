@@ -19,6 +19,24 @@ test("transpileAPGL NOP", () => {
     ]);
 });
 
+test("transpileAPGL Seq empty", () => {
+    const expr1 = new SeqAPGLExpr([]);
+    const expr2 = new SeqAPGLExpr([
+        new SeqAPGLExpr([]),
+        new SeqAPGLExpr([
+            new SeqAPGLExpr([]),
+        ]),
+    ]);
+
+    const expected = [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_END; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ];
+    assertEquals(transpileAPGL(expr1), expected);
+    assertEquals(transpileAPGL(expr2), expected);
+});
+
 test("transpileAPGL if", () => {
     const expr = new SeqAPGLExpr([
         new IfAPGLExpr(
@@ -35,6 +53,33 @@ test("transpileAPGL if", () => {
         "STATE_2; NZ; STATE_4_IF_NZ; NOP",
         "STATE_3_IF_Z; *; STATE_END; INC U0, NOP",
         "STATE_4_IF_NZ; *; STATE_END; INC U1, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("transpileAPGL if nest", () => {
+    const expr = new SeqAPGLExpr([
+        new IfAPGLExpr(
+            new ActionAPGLExpr(["TDEC U0"]),
+            new ActionAPGLExpr(["INC U0", "NOP"]),
+            new IfAPGLExpr(
+                new ActionAPGLExpr(["TDEC U1"]),
+                new ActionAPGLExpr(["INC U1", "NOP"]),
+                new SeqAPGLExpr([]),
+            ),
+        ),
+    ]);
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; TDEC U0",
+        "STATE_2; Z; STATE_3_IF_Z; NOP",
+        "STATE_2; NZ; STATE_4_IF_NZ; NOP",
+        "STATE_3_IF_Z; *; STATE_END; INC U0, NOP",
+        "STATE_4_IF_NZ; *; STATE_5; TDEC U1",
+        "STATE_6_IF_Z; *; STATE_END; INC U1, NOP",
+        "STATE_5; Z; STATE_6_IF_Z; NOP",
+        "STATE_5; NZ; STATE_END; NOP",
         "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
@@ -102,7 +147,26 @@ test("transpileAPGL while", () => {
     ]);
 });
 
-test("transpileAPGL options", () => {
+test("transpileAPGL while body", () => {
+    const expr = new WhileAPGLExpr(
+        "NZ",
+        new ActionAPGLExpr(["TDEC U0"]),
+        new SeqAPGLExpr([
+            new ActionAPGLExpr(["OUTPUT 1", "NOP"]),
+        ]),
+    );
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; TDEC U0",
+        "STATE_2; Z; STATE_END; NOP",
+        "STATE_2; NZ; STATE_3_WHILE_BODY; NOP",
+        "STATE_3_WHILE_BODY; *; STATE_1_INITIAL; OUTPUT 1, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("transpileAPGL options prefix", () => {
     const expr = new ActionAPGLExpr(["NOP"]);
     assertEquals(transpileAPGL(expr, { prefix: "X_" }), [
         "INITIAL; *; X_1_INITIAL; NOP",

@@ -1712,6 +1712,12 @@ const rightParen = token(")").desc([
 const semicolon = token(";").desc([
     "`;`"
 ]);
+const curlyLeft = token("{").desc([
+    "`{`"
+]);
+const curlyRight = token("}").desc([
+    "`}`"
+]);
 const varAPGMExpr = identifierWithLocation.map((x)=>new VarAPGMExpr(x[0], x[1])
 );
 function funcAPGMExpr() {
@@ -1736,7 +1742,7 @@ function seqAPGMExprRaw() {
     ).repeat();
 }
 function seqAPGMExpr() {
-    return seqAPGMExprRaw().wrap(token("{"), token("}")).map((x)=>new SeqAPGMExpr(x)
+    return seqAPGMExprRaw().wrap(curlyLeft, curlyRight).map((x)=>new SeqAPGMExpr(x)
     );
 }
 const whileKeyword = mod.choice(token("while_z"), token("while_nz")).map((x)=>x === "while_z" ? "Z" : "NZ"
@@ -2114,7 +2120,7 @@ function transpileAPGMExpr(e) {
     } else if (e instanceof StringAPGMExpr) {
         throw Error(`string is not allowed: ${e.value}`);
     } else if (e instanceof VarAPGMExpr) {
-        throw Error(`macro variable is not allowed: ${e.name}`);
+        throw Error(`macro variable is not allowed: variable "${e.name}"${formatLocationAt(e.location)}`);
     } else if (e instanceof WhileAPGMExpr) {
         return new WhileAPGLExpr(e.modifier, t(e.cond), t(e.body));
     }
@@ -2203,7 +2209,14 @@ class Transpiler {
     }
     transpileSeqAPGLExpr(ctx, seqExpr) {
         if (seqExpr.exprs.length === 0) {
-            return ctx.output ?? ctx.input;
+            if (ctx.output !== undefined) {
+                if (ctx.output !== ctx.input) {
+                    this.emitTransition(ctx.input, ctx.output);
+                }
+                return ctx.output;
+            } else {
+                return ctx.input;
+            }
         }
         let state = ctx.input;
         for (const [i, expr] of seqExpr.exprs.entries()){
@@ -2436,7 +2449,7 @@ class MacroExpander {
             const d = ds[0];
             const location8 = main1.macros.slice().reverse().find((x)=>x.name === d
             )?.location;
-            throw Error('duplicate definition of macro: "' + d + '"' + formatLocationAt(location8));
+            throw Error(`duplicate definition of macro: "${d}"` + formatLocationAt(location8));
         }
     }
     expand() {
