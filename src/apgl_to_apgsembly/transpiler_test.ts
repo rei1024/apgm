@@ -9,12 +9,12 @@ import {
 
 import { assertEquals, test } from "../deps_test.ts";
 
-test("transpileAPGL", () => {
+test("transpileAPGL NOP", () => {
     const expr = new ActionAPGLExpr(["NOP"]);
     assertEquals(transpileAPGL(expr), [
         "INITIAL; *; STATE_1_INITIAL; NOP",
-        "STATE_1_INITIAL; *; STATE_2; NOP",
-        "STATE_2; *; STATE_2; HALT_OUT",
+        "STATE_1_INITIAL; *; STATE_END; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
 
@@ -32,10 +32,9 @@ test("transpileAPGL if", () => {
         "STATE_1_INITIAL; *; STATE_2; TDEC U0",
         "STATE_2; Z; STATE_3_IF_Z; NOP",
         "STATE_2; NZ; STATE_4_IF_NZ; NOP",
-        "STATE_3_IF_Z; *; STATE_5; INC U0, NOP",
-        "STATE_4_IF_NZ; *; STATE_6; INC U1, NOP",
-        "STATE_5; *; STATE_6; NOP",
-        "STATE_6; *; STATE_6; HALT_OUT",
+        "STATE_3_IF_Z; *; STATE_END; INC U0, NOP",
+        "STATE_4_IF_NZ; *; STATE_END; INC U1, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
 
@@ -51,10 +50,10 @@ test("transpileAPGL if z", () => {
     assertEquals(transpileAPGL(expr), [
         "INITIAL; *; STATE_1_INITIAL; NOP",
         "STATE_1_INITIAL; *; STATE_2; TDEC U0",
-        "STATE_3_IF_Z; *; STATE_4; INC U0, NOP",
+        "STATE_3_IF_Z; *; STATE_END; INC U0, NOP",
         "STATE_2; Z; STATE_3_IF_Z; NOP",
-        "STATE_2; NZ; STATE_4; NOP",
-        "STATE_4; *; STATE_4; HALT_OUT",
+        "STATE_2; NZ; STATE_END; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
 
@@ -65,9 +64,8 @@ test("transpileAPGL loop", () => {
 
     assertEquals(transpileAPGL(expr), [
         "INITIAL; *; STATE_1_INITIAL; NOP",
-        "STATE_1_INITIAL; *; STATE_3; INC U0, NOP",
-        "STATE_3; *; STATE_1_INITIAL; NOP",
-        "STATE_2_LOOP_BREAK; *; STATE_2_LOOP_BREAK; HALT_OUT",
+        "STATE_1_INITIAL; *; STATE_1_INITIAL; INC U0, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
 
@@ -81,9 +79,9 @@ test("transpileAPGL while", () => {
     assertEquals(transpileAPGL(expr), [
         "INITIAL; *; STATE_1_INITIAL; NOP",
         "STATE_1_INITIAL; *; STATE_2; TDEC U0",
-        "STATE_2; Z; STATE_3_WHILE_END; NOP",
+        "STATE_2; Z; STATE_END; NOP",
         "STATE_2; NZ; STATE_1_INITIAL; NOP",
-        "STATE_3_WHILE_END; *; STATE_3_WHILE_END; HALT_OUT",
+        "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
 
@@ -91,7 +89,7 @@ test("transpileAPGL options", () => {
     const expr = new ActionAPGLExpr(["NOP"]);
     assertEquals(transpileAPGL(expr, { prefix: "X_" }), [
         "INITIAL; *; X_1_INITIAL; NOP",
-        "X_1_INITIAL; *; X_2; NOP",
-        "X_2; *; X_2; HALT_OUT",
+        "X_1_INITIAL; *; X_END; NOP",
+        "X_END; *; X_END; HALT_OUT",
     ]);
 });

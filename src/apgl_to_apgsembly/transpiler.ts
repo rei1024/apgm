@@ -70,7 +70,7 @@ export class Transpiler {
         const secondState = this.getFreshName() + "_INITIAL";
         this.emitTransition(initialState, secondState);
 
-        const maybeEndState = this.getFreshName() + "_END";
+        const maybeEndState = this.prefix + "END";
 
         const endState = this.transpileExpr(
             new Context(secondState, maybeEndState),
@@ -243,11 +243,14 @@ export class Transpiler {
         const breakState = ctx.output ?? (this.getFreshName() + "_LOOP_BREAK");
         this.loopFinalStates.push(breakState);
         const nextState = this.transpileExpr(
-            new Context(ctx.input),
+            new Context(ctx.input, ctx.input),
             loopExpr.body,
         );
         this.loopFinalStates.pop();
-        this.emitTransition(nextState, ctx.input);
+
+        if (nextState !== ctx.input) {
+            this.emitTransition(nextState, ctx.input);
+        }
         return breakState;
     }
 
