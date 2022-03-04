@@ -69,7 +69,13 @@ export class Transpiler {
         const initialState = "INITIAL";
         const secondState = this.getFreshName() + "_INITIAL";
         this.emitTransition(initialState, secondState);
-        const endState = this.transpileExpr(new Context(secondState), expr);
+
+        const maybeEndState = this.getFreshName() + "_END";
+
+        const endState = this.transpileExpr(
+            new Context(secondState, maybeEndState),
+            expr,
+        );
         this.emitLine({
             currentState: endState,
             prevOutput: "*",
