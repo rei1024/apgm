@@ -202,7 +202,11 @@ export function transpileAPGMExpr(e: APGMExpr): APGLExpr {
     } else if (e instanceof StringAPGMExpr) {
         throw Error(`string is not allowed: ${e.value}`);
     } else if (e instanceof VarAPGMExpr) {
-        throw Error(`macro variable is not allowed: variable "${e.name}"${formatLocationAt(e.location)}`);
+        throw Error(
+            `macro variable is not allowed: variable "${e.name}"${
+                formatLocationAt(e.location)
+            }`,
+        );
     } else if (e instanceof WhileAPGMExpr) {
         return new WhileAPGLExpr(e.modifier, t(e.cond), t(e.body));
     }

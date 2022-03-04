@@ -1995,7 +1995,7 @@ function transpileEmptyArgFunc(funcExpr, expr) {
 }
 function transpileNumArgFunc(funcExpr, expr) {
     if (funcExpr.args.length !== 1) {
-        throw Error(`number of argument is not 1: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
+        throw Error(`number of arguments is not 1: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     const arg = funcExpr.args[0];
     if (!(arg instanceof NumberAPGMExpr)) {
@@ -2005,7 +2005,7 @@ function transpileNumArgFunc(funcExpr, expr) {
 }
 function transpileStringArgFunc(funcExpr, expr) {
     if (funcExpr.args.length !== 1) {
-        throw Error(`number of argument is not 1: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
+        throw Error(`number of arguments is not 1: "${funcExpr.name}"${formatLocationAt(funcExpr.location)}`);
     }
     const arg = funcExpr.args[0];
     if (!(arg instanceof StringAPGMExpr)) {
@@ -2382,7 +2382,7 @@ class Transpiler {
         } else {
             const breakState = this.loopFinalStates[this.loopFinalStates.length - breakExpr.level];
             if (breakState === undefined) {
-                throw Error("break level is greater than number of nest of while or loop");
+                throw Error("break level is greater than number of nests of while or loop");
             }
             if (ctx.input !== breakState) {
                 this.emitTransition(ctx.input, breakState);
@@ -2449,7 +2449,7 @@ class MacroExpander {
             const d = ds[0];
             const location8 = main1.macros.slice().reverse().find((x)=>x.name === d
             )?.location;
-            throw Error(`duplicate definition of macro: "${d}"` + formatLocationAt(location8));
+            throw Error(`There is a macro with the same name: "${d}"` + formatLocationAt(location8));
         }
     }
     expand() {
