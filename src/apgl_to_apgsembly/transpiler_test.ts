@@ -1,6 +1,7 @@
 import { transpileAPGL } from "./transpiler.ts";
 import {
     ActionAPGLExpr,
+    BreakAPGLExpr,
     IfAPGLExpr,
     LoopAPGLExpr,
     SeqAPGLExpr,
@@ -65,6 +66,22 @@ test("transpileAPGL loop", () => {
     assertEquals(transpileAPGL(expr), [
         "INITIAL; *; STATE_1_INITIAL; NOP",
         "STATE_1_INITIAL; *; STATE_1_INITIAL; INC U0, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("transpileAPGL loop break", () => {
+    const expr = new LoopAPGLExpr(
+        new SeqAPGLExpr([
+            new ActionAPGLExpr(["INC U0", "NOP"]),
+            new BreakAPGLExpr(undefined),
+        ]),
+    );
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; INC U0, NOP",
+        "STATE_2; *; STATE_END; NOP",
         "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
