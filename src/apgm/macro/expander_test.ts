@@ -71,7 +71,7 @@ test("duplicate macro", () => {
             expand(new Main(macros, [], body));
         },
         Error,
-        'duplicate definition of macro: "f!"',
+        'There is a macro with the same name: "f!"',
     );
 });
 

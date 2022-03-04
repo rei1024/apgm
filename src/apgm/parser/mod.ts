@@ -64,6 +64,11 @@ export const rightParen = token(")").desc(["`)`"]);
 /** `;` */
 export const semicolon = token(";").desc(["`;`"]);
 
+/** `(` */
+export const curlyLeft = token("{").desc(["`{`"]);
+/** `)` */
+export const curlyRight = token("}").desc(["`}`"]);
+
 export const varAPGMExpr = identifierWithLocation.map((x) =>
     new VarAPGMExpr(x[0], x[1])
 );
@@ -98,8 +103,8 @@ export function seqAPGMExprRaw(): bnb.Parser<APGMExpr[]> {
     return bnb.lazy(() => statement()).repeat();
 }
 
-export function seqAPGMExpr() {
-    return seqAPGMExprRaw().wrap(token("{"), token("}")).map((x) =>
+export function seqAPGMExpr(): bnb.Parser<SeqAPGMExpr> {
+    return seqAPGMExprRaw().wrap(curlyLeft, curlyRight).map((x) =>
         new SeqAPGMExpr(x)
     );
 }
@@ -149,7 +154,7 @@ export function ifAPGMExpr() {
 }
 
 /**
- * macro f(x) {
+ * macro f!(x) {
  *   x;
  * }
  */
