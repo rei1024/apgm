@@ -303,11 +303,14 @@ export class Transpiler {
 
         this.loopFinalStates.push(finalState);
         const bodyEndState = this.transpileExpr(
-            new Context(bodyStartState),
+            new Context(bodyStartState, ctx.input),
             whileExpr.body,
         );
         this.loopFinalStates.pop();
-        this.emitTransition(bodyEndState, ctx.input);
+
+        if (bodyEndState !== ctx.input) {
+            this.emitTransition(bodyEndState, ctx.input);
+        }
 
         return finalState;
     }
@@ -322,7 +325,9 @@ export class Transpiler {
             if (breakState === undefined) {
                 throw Error("break outside while or loop");
             }
-            this.emitTransition(ctx.input, breakState);
+            if (ctx.input !== breakState) {
+                this.emitTransition(ctx.input, breakState);
+            }
         } else {
             const breakState = this.loopFinalStates[
                 this.loopFinalStates.length - breakExpr.level
@@ -332,7 +337,9 @@ export class Transpiler {
                     "break level is greater than number of nest of while or loop",
                 );
             }
-            this.emitTransition(ctx.input, breakState);
+            if (ctx.input !== breakState) {
+                this.emitTransition(ctx.input, breakState);
+            }
         }
         return ctx.output ?? (this.getFreshName() + "_BREAK_UNUSED");
     }
