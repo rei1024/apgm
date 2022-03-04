@@ -39,6 +39,25 @@ test("transpileAPGL if", () => {
     ]);
 });
 
+test("transpileAPGL if z", () => {
+    const expr = new SeqAPGLExpr([
+        new IfAPGLExpr(
+            new ActionAPGLExpr(["TDEC U0"]),
+            new ActionAPGLExpr(["INC U0", "NOP"]),
+            new SeqAPGLExpr([]),
+        ),
+    ]);
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; TDEC U0",
+        "STATE_3_IF_Z; *; STATE_4; INC U0, NOP",
+        "STATE_2; Z; STATE_3_IF_Z; NOP",
+        "STATE_2; NZ; STATE_4; NOP",
+        "STATE_4; *; STATE_4; HALT_OUT",
+    ]);
+});
+
 test("transpileAPGL loop", () => {
     const expr = new LoopAPGLExpr(
         new ActionAPGLExpr(["INC U0", "NOP"]),
