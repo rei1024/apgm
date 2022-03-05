@@ -1620,7 +1620,7 @@ class StringAPGMExpr extends APGMExpr {
         return f(this);
     }
     pretty() {
-        return this.value;
+        return `"` + this.value + `"`;
     }
 }
 class SeqAPGMExpr extends APGMExpr {

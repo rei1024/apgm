@@ -3,6 +3,7 @@
 APGsembly macro language
 
 ## Pipeline
+
 ```mermaid
 graph TD
     APGM1[APGM] -->|Expand macro| APGM2[APGM]
