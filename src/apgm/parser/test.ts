@@ -225,10 +225,10 @@ test("parser: pretty", () => {
 
 test("parser: pretty 2", () => {
     const value = apgmExpr().tryParse(`{ f(1); g("2"); }`);
-    assertEquals(value.pretty(), `{f(1); g(2); }`);
+    assertEquals(value.pretty(), `{f(1); g("2"); }`);
 });
 
 test("parser: pretty loop", () => {
     const value = apgmExpr().tryParse(`loop { f(1); g("2"); }`);
-    assertEquals(value.pretty(), `loop {f(1); g(2); }`);
+    assertEquals(value.pretty(), `loop {f(1); g("2"); }`);
 });
