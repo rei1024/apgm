@@ -1890,9 +1890,6 @@ class BreakAPGLExpr extends APGLExpr {
     constructor(level){
         super();
         this.level = level;
-        if (level !== undefined && level < 1) {
-            throw Error("break level is less than 1");
-        }
     }
     transform(f) {
         return f(this);

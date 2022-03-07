@@ -34,6 +34,7 @@ graph TD
 ## Coverage
 
 ### Requirements
+
 - `make`
 - `deno`
 - `lcov`
