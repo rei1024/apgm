@@ -8,7 +8,7 @@ import {
     WhileAPGLExpr,
 } from "../apgl/ast/mod.ts";
 
-import { assertEquals, test } from "../deps_test.ts";
+import { assertEquals, assertThrows, test } from "../deps_test.ts";
 
 test("transpileAPGL NOP", () => {
     const expr = new ActionAPGLExpr(["NOP"]);
@@ -17,6 +17,13 @@ test("transpileAPGL NOP", () => {
         "STATE_1_INITIAL; *; STATE_END; NOP",
         "STATE_END; *; STATE_END; HALT_OUT",
     ]);
+});
+
+test("transpileAPGL empty action throws", () => {
+    const expr = new ActionAPGLExpr([]);
+    assertThrows(() => {
+        transpileAPGL(expr);
+    });
 });
 
 test("transpileAPGL Seq empty", () => {
@@ -103,6 +110,25 @@ test("transpileAPGL if z", () => {
     ]);
 });
 
+test("transpileAPGL if nz", () => {
+    const expr = new SeqAPGLExpr([
+        new IfAPGLExpr(
+            new ActionAPGLExpr(["TDEC U0"]),
+            new SeqAPGLExpr([]),
+            new ActionAPGLExpr(["INC U0", "NOP"]),
+        ),
+    ]);
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; TDEC U0",
+        "STATE_3_IF_NZ; *; STATE_END; INC U0, NOP",
+        "STATE_2; Z; STATE_END; NOP",
+        "STATE_2; NZ; STATE_3_IF_NZ; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
 test("transpileAPGL loop", () => {
     const expr = new LoopAPGLExpr(
         new ActionAPGLExpr(["INC U0", "NOP"]),
@@ -131,7 +157,17 @@ test("transpileAPGL loop break", () => {
     ]);
 });
 
-test("transpileAPGL while", () => {
+test("transpileAPGL break", () => {
+    const expr = new SeqAPGLExpr([
+        new ActionAPGLExpr(["INC U0", "NOP"]),
+        new BreakAPGLExpr(undefined),
+    ]);
+    assertThrows(() => {
+        transpileAPGL(expr);
+    });
+});
+
+test("transpileAPGL while nz", () => {
     const expr = new WhileAPGLExpr(
         "NZ",
         new ActionAPGLExpr(["TDEC U0"]),
@@ -143,6 +179,22 @@ test("transpileAPGL while", () => {
         "STATE_1_INITIAL; *; STATE_2; TDEC U0",
         "STATE_2; Z; STATE_END; NOP",
         "STATE_2; NZ; STATE_1_INITIAL; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("transpileAPGL while z", () => {
+    const expr = new WhileAPGLExpr(
+        "Z",
+        new ActionAPGLExpr(["TDEC U0"]),
+        new SeqAPGLExpr([]),
+    );
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; TDEC U0",
+        "STATE_2; Z; STATE_1_INITIAL; NOP",
+        "STATE_2; NZ; STATE_END; NOP",
         "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });

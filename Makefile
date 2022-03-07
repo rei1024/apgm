@@ -10,3 +10,8 @@ up:
 	file_server . -p 1618
 bundle:
 	deno bundle src/integration/mod.ts dist/integraion.js
+cov:
+	deno test --config=deno.jsonc --coverage=coverage
+	deno coverage coverage --lcov > coverage.lcov
+	genhtml -o coverage/html coverage.lcov
+	open coverage/html/index.html
