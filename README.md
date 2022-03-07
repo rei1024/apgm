@@ -21,8 +21,6 @@ graph TD
   - https://deno.land/#installation
   - `file_server`
     - https://deno.land/manual@v1.15.3/examples/file_server
-- `npm`
-  - Run `$ npm install`
 
 ### Usage
 
@@ -32,3 +30,11 @@ graph TD
 - `$ make w` Unit tests with file watcher
 - `$ make fmt` Formatting
 - `$ make bundle` Bundling
+
+## Coverage
+
+### Requirements
+- `make`
+- `deno`
+- `lcov`
+  - https://formulae.brew.sh/formula/lcov
