@@ -39,3 +39,7 @@ graph TD
 - `deno`
 - `lcov`
   - https://formulae.brew.sh/formula/lcov
+
+### Usage
+
+- `$ make cov` open lcov page
