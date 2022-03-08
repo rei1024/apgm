@@ -1472,17 +1472,25 @@ function prettyError(fail1, source) {
     const errorLine = lines[fail1.location.line - 1];
     const below = lines[fail1.location.line];
     const arrowLine = " ".repeat(Math.max(0, fail1.location.column - 1)) + "^";
-    const errorLines = [
+    const aboveLines = [
         ...above === undefined ? [] : [
             above
         ],
-        errorLine,
-        arrowLine,
+        errorLine, 
+    ];
+    const belowLines = [
         ...below === undefined ? [] : [
             below
         ], 
-    ].map((x)=>"| " + x
-    );
+    ];
+    const prefix = "| ";
+    const errorLines = [
+        ...aboveLines.map((x)=>prefix + x
+        ),
+        " ".repeat(prefix.length) + arrowLine,
+        ...belowLines.map((x)=>prefix + x
+        ), 
+    ];
     return [
         `parse error at line ${fail1.location.line} column ${fail1.location.column}:`,
         `  expected ${fail1.expected.join(", ")}`,
