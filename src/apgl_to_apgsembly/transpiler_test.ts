@@ -64,6 +64,38 @@ test("transpileAPGL if", () => {
     ]);
 });
 
+test("transpileAPGL if empty", () => {
+    const expr = new SeqAPGLExpr([
+        new IfAPGLExpr(
+            new ActionAPGLExpr(["TDEC U0"]),
+            new SeqAPGLExpr([]),
+            new SeqAPGLExpr([]),
+        ),
+    ]);
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_END; TDEC U0",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("transpileAPGL if all empty", () => {
+    const expr = new SeqAPGLExpr([
+        new IfAPGLExpr(
+            new SeqAPGLExpr([]),
+            new SeqAPGLExpr([]),
+            new SeqAPGLExpr([]),
+        ),
+    ]);
+
+    assertEquals(transpileAPGL(expr), [
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_END; NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
 test("transpileAPGL if nest", () => {
     const expr = new SeqAPGLExpr([
         new IfAPGLExpr(

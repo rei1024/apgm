@@ -199,6 +199,14 @@ export class Transpiler {
         cond: APGLExpr,
         body: APGLExpr,
     ): string {
+        if (isEmptyExpr(body)) {
+            const condEndState = this.transpileExpr(
+                new Context(ctx.input, ctx.output),
+                cond,
+            );
+            return condEndState;
+        }
+
         const condEndState = this.transpileExpr(new Context(ctx.input), cond);
         const thenStartState = this.getFreshName() + "_IF_Z";
         const endState = this.transpileExpr(

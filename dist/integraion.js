@@ -2267,6 +2267,10 @@ class Transpiler {
         return elseEndState;
     }
     transpileIfAPGLExprOnlyZ(ctx, cond, body) {
+        if (isEmptyExpr(body)) {
+            const condEndState = this.transpileExpr(new Context1(ctx.input, ctx.output), cond);
+            return condEndState;
+        }
         const condEndState = this.transpileExpr(new Context1(ctx.input), cond);
         const thenStartState = this.getFreshName() + "_IF_Z";
         const endState = this.transpileExpr(new Context1(thenStartState, ctx.output), body);
