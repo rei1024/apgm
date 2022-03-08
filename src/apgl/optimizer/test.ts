@@ -126,13 +126,13 @@ test("optimize four inc", () => {
 
 test("optimize two tdec", () => {
     const before = new SeqAPGLExpr([
-        new ActionAPGLExpr(["TDEC U1", "NOP"]),
-        new ActionAPGLExpr(["TDEC U2", "NOP"]),
+        new ActionAPGLExpr(["TDEC U1"]),
+        new ActionAPGLExpr(["TDEC U2"]),
     ]);
 
     const after = new SeqAPGLExpr([
-        new ActionAPGLExpr(["TDEC U1", "NOP"]),
-        new ActionAPGLExpr(["TDEC U2", "NOP"]),
+        new ActionAPGLExpr(["TDEC U1"]),
+        new ActionAPGLExpr(["TDEC U2"]),
     ]);
     assertEquals(optimize(before), after);
 });
@@ -140,25 +140,23 @@ test("optimize two tdec", () => {
 test("optimize inc and tdec", () => {
     const before = new SeqAPGLExpr([
         new ActionAPGLExpr(["INC U1", "NOP"]),
-        new ActionAPGLExpr(["TDEC U2", "NOP"]),
+        new ActionAPGLExpr(["TDEC U2"]),
     ]);
 
     const after = new SeqAPGLExpr([
-        new ActionAPGLExpr(["INC U1", "NOP"]),
-        new ActionAPGLExpr(["TDEC U2", "NOP"]),
+        new ActionAPGLExpr(["INC U1", "TDEC U2"]),
     ]);
     assertEquals(optimize(before), after);
 });
 
 test("optimize tdec and inc", () => {
     const before = new SeqAPGLExpr([
-        new ActionAPGLExpr(["TDEC U2", "NOP"]),
+        new ActionAPGLExpr(["TDEC U2"]),
         new ActionAPGLExpr(["INC U1", "NOP"]),
     ]);
 
     const after = new SeqAPGLExpr([
-        new ActionAPGLExpr(["TDEC U2", "NOP"]),
-        new ActionAPGLExpr(["INC U1", "NOP"]),
+        new ActionAPGLExpr(["TDEC U2", "INC U1"]),
     ]);
     assertEquals(optimize(before), after);
 });

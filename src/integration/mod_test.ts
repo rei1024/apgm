@@ -105,10 +105,8 @@ test("integration actions", () => {
     assertEquals(res, [
         ...comment,
         "INITIAL; *; STATE_1_INITIAL; NOP",
-        "STATE_1_INITIAL; *; STATE_2; INC U0, NOP",
-        "STATE_2; *; STATE_3; TDEC U1",
-        "STATE_3; *; STATE_4; INC B2, NOP",
-        "STATE_4; *; STATE_END; TDEC B3",
+        "STATE_1_INITIAL; *; STATE_2; INC U0, TDEC U1, INC B2",
+        "STATE_2; *; STATE_END; TDEC B3",
         "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });

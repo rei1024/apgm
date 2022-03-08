@@ -2491,10 +2491,10 @@ function optimizeOnce(expr) {
 }
 function merge(as, bs) {
     if (as.length === 0) {
-        return bs;
+        return bs.slice();
     }
     if (bs.length === 0) {
-        return as;
+        return as.slice();
     }
     if (as.some((x)=>x instanceof HaltOutAction
     )) {
@@ -2508,21 +2508,26 @@ function merge(as, bs) {
     );
     const bsWithoutNOP = bs.filter((x)=>!(x instanceof NopAction)
     );
-    if (asWithoutNOP.every((a)=>!a.doesReturnValue()
-    ) && bsWithoutNOP.every((b)=>!b.doesReturnValue()
-    )) {
-        const distinctComponent = asWithoutNOP.every((a)=>{
-            return bsWithoutNOP.every((b)=>{
-                return !a.isSameComponent(b);
-            });
-        });
-        if (distinctComponent) {
-            const merged = asWithoutNOP.concat(bsWithoutNOP);
-            merged.push(new NopAction());
-            return merged;
-        }
+    const asWithoutNOPNonReturn = asWithoutNOP.every((a)=>!a.doesReturnValue()
+    );
+    const bsWithoutNOPNonReturn = bsWithoutNOP.every((b)=>!b.doesReturnValue()
+    );
+    if (!asWithoutNOPNonReturn && !bsWithoutNOPNonReturn) {
+        return undefined;
     }
-    return undefined;
+    const distinctComponent = asWithoutNOP.every((a)=>{
+        return bsWithoutNOP.every((b)=>{
+            return !a.isSameComponent(b);
+        });
+    });
+    if (!distinctComponent) {
+        return undefined;
+    }
+    const merged = asWithoutNOP.concat(bsWithoutNOP);
+    if (asWithoutNOPNonReturn && bsWithoutNOPNonReturn) {
+        merged.push(new NopAction());
+    }
+    return merged;
 }
 function toActions(actionExpr) {
     return actionExpr.actions.flatMap((x)=>{
