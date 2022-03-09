@@ -124,10 +124,49 @@ test("integration if", () => {
         ...comment,
         "INITIAL; *; STATE_1_INITIAL; NOP",
         "STATE_1_INITIAL; *; STATE_2; TDEC U0",
-        "STATE_2; Z; STATE_3_IF_Z; NOP",
-        "STATE_2; NZ; STATE_4_IF_NZ; NOP",
-        "STATE_3_IF_Z; *; STATE_END; OUTPUT 0, NOP",
-        "STATE_4_IF_NZ; *; STATE_END; OUTPUT 1, NOP",
+        "STATE_2; Z; STATE_END; OUTPUT 0, NOP",
+        "STATE_2; NZ; STATE_END; OUTPUT 1, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("integration if multi", () => {
+    const src = `if_z(nop()) {
+        output("1");
+        output("2");
+    } else {
+        output("3");
+        output("4");
+    }
+      `;
+    const res = integration(src);
+    assertEquals(res, [
+        ...comment,
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; NOP",
+        "STATE_2; Z; STATE_3; OUTPUT 1, NOP",
+        "STATE_2; NZ; STATE_4; OUTPUT 3, NOP",
+        "STATE_3; *; STATE_END; OUTPUT 2, NOP",
+        "STATE_4; *; STATE_END; OUTPUT 4, NOP",
+        "STATE_END; *; STATE_END; HALT_OUT",
+    ]);
+});
+
+test("integration loop if", () => {
+    const src = `
+    if_z(nop()) {
+        loop {}
+    }
+    `;
+    const res = integration(src);
+
+    assertEquals(res, [
+        ...comment,
+        "INITIAL; *; STATE_1_INITIAL; NOP",
+        "STATE_1_INITIAL; *; STATE_2; NOP",
+        "STATE_2; Z; STATE_3; NOP",
+        "STATE_2; NZ; STATE_END; NOP",
+        "STATE_3; *; STATE_3; NOP",
         "STATE_END; *; STATE_END; HALT_OUT",
     ]);
 });
