@@ -280,11 +280,29 @@ test("transpileAPGL loop 2 break 2", () => {
     ]);
 });
 
-test("transpileAPGL break", () => {
+test("transpileAPGL break throws", () => {
     const expr = new SeqAPGLExpr([
         new ActionAPGLExpr(["INC U0", "NOP"]),
         new BreakAPGLExpr(undefined),
     ]);
+    assertThrows(() => {
+        transpileAPGL(expr);
+    });
+});
+
+test("transpileAPGL break throws 2", () => {
+    const expr = new LoopAPGLExpr(
+        new BreakAPGLExpr(2),
+    );
+    assertThrows(() => {
+        transpileAPGL(expr);
+    });
+});
+
+test("transpileAPGL break throws -1", () => {
+    const expr = new LoopAPGLExpr(
+        new BreakAPGLExpr(-1),
+    );
     assertThrows(() => {
         transpileAPGL(expr);
     });
