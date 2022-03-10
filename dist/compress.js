@@ -1,17 +1,16 @@
-
 const pakoURL = "https://cdn.jsdelivr.net/npm/pako@2.0.4/dist/pako.esm.mjs";
 
 /**
- *
  * @param {Uint8Array} array
  * @returns {string}
  */
 function toHex(array) {
-    return [...array].map(x => (x >> 4).toString(16) + (x & 0x0F).toString(16)).join("");
+    return [...array].map((x) =>
+        (x >> 4).toString(16) + (x & 0x0F).toString(16)
+    ).join("");
 }
 
 /**
- *
  * @param {string} hex
  * @returns {Uint8Array}
  */
@@ -25,7 +24,6 @@ function fromHex(hex) {
 }
 
 /**
- *
  * @param {string} str
  * @returns {Promise<string>}
  */
@@ -37,7 +35,6 @@ export async function deflate(str) {
 }
 
 /**
- *
  * @param {string} str
  * @returns {Promise<string>}
  */

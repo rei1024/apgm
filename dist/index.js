@@ -75,7 +75,7 @@ const compile = () => {
         $copy.disabled = true;
         $input.classList.add("is-invalid");
     }
-}
+};
 
 $compile.addEventListener("click", () => {
     compile();
@@ -85,7 +85,9 @@ $run.addEventListener("click", () => {
     compile();
     // @ts-ignore
     if (!$copy.disabled) {
-        const url = new URL("https://rei1024.github.io/proj/apgsembly-emulator-2/");
+        const url = new URL(
+            "https://rei1024.github.io/proj/apgsembly-emulator-2/",
+        );
         localStorage.setItem("initial_code", $output.value);
         open(url);
     }
