@@ -18,7 +18,6 @@ test("seq optimize no", () => {
     assertEquals(optimizeSeq(before), before);
 });
 
-
 test("seq optimize emmpty elem", () => {
     const before = new SeqAPGLExpr([
         new SeqAPGLExpr([]),
@@ -36,7 +35,8 @@ test("seq optimize ", () => {
         new SeqAPGLExpr([action]),
     ]);
     const after = new SeqAPGLExpr([
-        action, action
+        action,
+        action,
     ]);
     assertEquals(optimizeSeq(before), after);
 });

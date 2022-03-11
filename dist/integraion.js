@@ -2542,10 +2542,9 @@ function optimizeOnce1(expr) {
 function optimizeSeqAPGLExpr1(seqExpr) {
     let newExprs = [];
     for (const expr of seqExpr.exprs){
-        if (isEmptyExpr(expr)) {
-            continue;
-        }
-        if (expr instanceof SeqAPGLExpr) {} else {
+        if (expr instanceof SeqAPGLExpr) {
+            newExprs = newExprs.concat(expr.exprs);
+        } else {
             newExprs.push(expr);
         }
     }

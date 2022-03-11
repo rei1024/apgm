@@ -3,10 +3,10 @@ import {
     APGLExpr,
     BreakAPGLExpr,
     IfAPGLExpr,
+    isEmptyExpr,
     LoopAPGLExpr,
     SeqAPGLExpr,
     WhileAPGLExpr,
-    isEmptyExpr,
 } from "../apgl/ast/mod.ts";
 
 export interface TranspilerOptions {
