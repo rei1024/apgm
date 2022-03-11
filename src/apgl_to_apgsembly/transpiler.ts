@@ -6,12 +6,8 @@ import {
     LoopAPGLExpr,
     SeqAPGLExpr,
     WhileAPGLExpr,
+    isEmptyExpr,
 } from "../apgl/ast/mod.ts";
-
-function isEmptyExpr(expr: APGLExpr): boolean {
-    return expr instanceof SeqAPGLExpr &&
-        expr.exprs.every((e) => isEmptyExpr(e));
-}
 
 export interface TranspilerOptions {
     prefix?: string;
