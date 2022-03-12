@@ -2275,12 +2275,17 @@ class Transpiler {
         ];
     }
     transpileWhileAPGLExprBodyEmpty(ctx, cond, modifier) {
+        const condStartState = ctx.inputZNZ === "*" ? ctx.input : this.getFreshName();
+        let trans = [];
+        if (ctx.inputZNZ !== "*") {
+            trans = trans.concat(this.emitTransition(ctx.input, condStartState, ctx.inputZNZ));
+        }
         const condEndState = this.getFreshName();
-        const condRes = this.transpileExpr(new Context1(ctx.input, condEndState, ctx.inputZNZ), cond);
+        const condRes = this.transpileExpr(new Context1(condStartState, condEndState, "*"), cond);
         const zRes = this.emitLine({
             currentState: condEndState,
             prevOutput: "Z",
-            nextState: modifier === "Z" ? ctx.input : ctx.output,
+            nextState: modifier === "Z" ? condStartState : ctx.output,
             actions: [
                 "NOP"
             ]
@@ -2288,12 +2293,13 @@ class Transpiler {
         const nzRes = this.emitLine({
             currentState: condEndState,
             prevOutput: "NZ",
-            nextState: modifier === "Z" ? ctx.output : ctx.input,
+            nextState: modifier === "Z" ? ctx.output : condStartState,
             actions: [
                 "NOP"
             ]
         });
         return [
+            ...trans,
             ...condRes,
             ...zRes,
             ...nzRes
