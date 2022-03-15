@@ -14,7 +14,7 @@ export const monarchTokensProvider = {
         // "break",
         // "repeat"
     ],
-    symbols: /[\#\!\%\&\*\+\-\.\/\:\;\<\=\>\@\^\|_\?]+/,
+    // symbols: /[\#\!\%\&\*\+\-\.\/\:\;\<\=\>\@\^\|_\?]+/,
     tokenizer: {
         root: [
             // Raw string literals

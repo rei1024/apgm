@@ -32,5 +32,5 @@ export const languageConfiguration = {
         // { open: "'", close: "'" }
     ],
     // completionの区切りに使用される
-    wordPattern: /[^\s\(\){};]+/g, // "/(-?\d.\d\w)|([^`~!@#%^&*()-=+[{]}\|;:'",.<>/?\s]+)/g"
+    wordPattern: /[^#\s\(\){};]+/g, // "/(-?\d.\d\w)|([^`~!@#%^&*()-=+[{]}\|;:'",.<>/?\s]+)/g"
 };
