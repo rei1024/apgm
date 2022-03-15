@@ -1806,7 +1806,7 @@ function macro() {
 }
 const header = mod.text("#").next(mod.match(/REGISTERS|COMPONENTS/)).desc([
     "#REGISTERS",
-    "#COMPONENT"
+    "#COMPONENTS"
 ]).chain((x)=>mod.match(/.*/).map((c)=>new Header(x, c)
     )
 );
@@ -2022,6 +2022,104 @@ function transpileStringArgFunc(funcExpr, expr) {
     }
     return expr(arg.value);
 }
+const emptyArgFuncs = new Map([
+    [
+        "nop",
+        A.nop()
+    ],
+    [
+        "inc_b2dx",
+        A.incB2DX()
+    ],
+    [
+        "inc_b2dy",
+        A.incB2DY()
+    ],
+    [
+        "tdec_b2dx",
+        A.tdecB2DX()
+    ],
+    [
+        "tdec_b2dy",
+        A.tdecB2DY()
+    ],
+    [
+        "read_b2d",
+        A.readB2D()
+    ],
+    [
+        "set_b2d",
+        A.setB2D()
+    ],
+    [
+        "add_a1",
+        A.addA1()
+    ],
+    [
+        "add_b0",
+        A.addB0()
+    ],
+    [
+        "add_b1",
+        A.addB1()
+    ],
+    [
+        "sub_a1",
+        A.subA1()
+    ],
+    [
+        "sub_b0",
+        A.subB0()
+    ],
+    [
+        "sub_b1",
+        A.subB1()
+    ],
+    [
+        "mul_0",
+        A.mul0()
+    ],
+    [
+        "mul_1",
+        A.mul1()
+    ],
+    [
+        "halt_out",
+        A.haltOUT()
+    ], 
+]);
+const numArgFuncs = new Map([
+    [
+        "inc_u",
+        A.incU
+    ],
+    [
+        "tdec_u",
+        A.tdecU
+    ],
+    [
+        "inc_b",
+        A.incB
+    ],
+    [
+        "tdec_b",
+        A.tdecB
+    ],
+    [
+        "read_b",
+        A.readB
+    ],
+    [
+        "set_b",
+        A.setB
+    ], 
+]);
+const strArgFuncs = new Map([
+    [
+        "output",
+        A.output
+    ], 
+]);
 function transpileFuncAPGMExpr(funcExpr) {
     const e = (a)=>transpileEmptyArgFunc(funcExpr, a)
     ;
@@ -2029,60 +2127,19 @@ function transpileFuncAPGMExpr(funcExpr) {
     ;
     const s = (a)=>transpileStringArgFunc(funcExpr, a)
     ;
+    const emptyOrUndefined = emptyArgFuncs.get(funcExpr.name);
+    if (emptyOrUndefined !== undefined) {
+        return e(emptyOrUndefined);
+    }
+    const numArgOrUndefined = numArgFuncs.get(funcExpr.name);
+    if (numArgOrUndefined !== undefined) {
+        return n(numArgOrUndefined);
+    }
+    const strArgOrUndefined = strArgFuncs.get(funcExpr.name);
+    if (strArgOrUndefined !== undefined) {
+        return s(strArgOrUndefined);
+    }
     switch(funcExpr.name){
-        case "inc_u":
-            return n((x)=>A.incU(x)
-            );
-        case "tdec_u":
-            return n((x)=>A.tdecU(x)
-            );
-        case "inc_b":
-            return n((x)=>A.incB(x)
-            );
-        case "tdec_b":
-            return n((x)=>A.tdecB(x)
-            );
-        case "read_b":
-            return n((x)=>A.readB(x)
-            );
-        case "set_b":
-            return n((x)=>A.setB(x)
-            );
-        case "inc_b2dx":
-            return e(A.incB2DX());
-        case "inc_b2dy":
-            return e(A.incB2DY());
-        case "tdec_b2dx":
-            return e(A.tdecB2DX());
-        case "tdec_b2dy":
-            return e(A.tdecB2DY());
-        case "read_b2d":
-            return e(A.readB2D());
-        case "set_b2d":
-            return e(A.setB2D());
-        case "add_a1":
-            return e(A.addA1());
-        case "add_b0":
-            return e(A.addB0());
-        case "add_b1":
-            return e(A.addB1());
-        case "sub_a1":
-            return e(A.subA1());
-        case "sub_b0":
-            return e(A.subB0());
-        case "sub_b1":
-            return e(A.subB1());
-        case "mul_0":
-            return e(A.mul0());
-        case "mul_1":
-            return e(A.mul1());
-        case "nop":
-            return e(A.nop());
-        case "halt_out":
-            return e(A.haltOUT());
-        case "output":
-            return s((x)=>A.output(x)
-            );
         case "break":
             {
                 if (funcExpr.args.length === 0) {
@@ -2556,6 +2613,7 @@ function optimizeSeqAPGLExpr1(seqExpr) {
     }
     return new SeqAPGLExpr(newExprs);
 }
+export { emptyArgFuncs as emptyArgFuncs, numArgFuncs as numArgFuncs, strArgFuncs as strArgFuncs };
 function logged(f, x, logMessage = undefined) {
     const y = f(x);
     if (logMessage !== undefined) {
