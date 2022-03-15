@@ -2,10 +2,10 @@ import { optimize } from "./mod.ts";
 import { assertEquals, test } from "../../deps_test.ts";
 import {
     ActionAPGLExpr,
+    IfAPGLExpr,
     LoopAPGLExpr,
     SeqAPGLExpr,
     WhileAPGLExpr,
-    IfAPGLExpr
 } from "../ast/mod.ts";
 
 test("optimize empty", () => {

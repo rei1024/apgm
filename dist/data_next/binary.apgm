@@ -1,5 +1,5 @@
 /* B.pointer = 0 */
-macro reset_head_b!(b) {
+macro reset_pointer_b!(b) {
     while_nz (tdec_b(b)) {}
 }
 
@@ -10,18 +10,26 @@ macro reset_u!(a) {
 
 /* Copy Ua to Ub */
 macro copy_u!(a, b, temp) {
-  while_nz(tdec_u(a)) {
-    inc_u(b);
-    inc_u(temp);
-  }
-  while_nz(tdec_u(temp)) {
-    inc_u(a);
-  }
+    add_u!(a, b, temp);
+}
+
+/*
+ * Ub = Ua + Ub
+ */
+macro add_u!(a, b, temp) {
+    while_nz(tdec_u(a)) {
+        inc_u(b);
+        inc_u(temp);
+    }
+
+    while_nz(tdec_u(temp)) {
+        inc_u(a);
+    }
 }
 
 /* B.pointer = Un */
 macro binary_goto!(b, n, temp1, temp2) {
-    reset_head_b!(b);
+    reset_pointer_b!(b);
     copy_u!(n, temp1, temp2);
     while_nz (tdec_u(temp1)) {
         inc_b(b);

@@ -1550,7 +1550,10 @@ class IfAPGMExpr extends APGMExpr {
         return f(new IfAPGMExpr(this.modifier, this.cond.transform(f), this.thenBody.transform(f), this.elseBody !== undefined ? this.elseBody.transform(f) : undefined));
     }
     pretty() {
-        return `if_${this.modifier === "Z" ? "z" : "nz"}(${this.cond.pretty()}) ${this.thenBody.pretty()}` + this.elseBody === undefined ? `` : ` else ${this.elseBody?.pretty()}`;
+        const el = this.elseBody === undefined ? `` : ` else ${this.elseBody?.pretty()}`;
+        const keyword = `if_${this.modifier === "Z" ? "z" : "nz"}`;
+        const cond = this.cond.pretty();
+        return `${keyword} (${cond}) ${this.thenBody.pretty()}` + el;
     }
 }
 class LoopAPGMExpr extends APGMExpr {
@@ -1728,11 +1731,15 @@ const curlyRight = token("}").desc([
 ]);
 const varAPGMExpr = identifierWithLocation.map((x)=>new VarAPGMExpr(x[0], x[1])
 );
+function argExprs(arg) {
+    return mod.lazy(()=>arg()
+    ).sepBy(comma).wrap(leftParen, rightParen);
+}
 function funcAPGMExpr() {
     return _.next(mod.location).chain((location5)=>{
         return mod.choice(macroIdentifier, identifier).chain((ident)=>{
-            return mod.lazy(()=>apgmExpr()
-            ).sepBy(comma).wrap(leftParen, rightParen).map((args)=>{
+            return argExprs(()=>apgmExpr()
+            ).map((args)=>{
                 return new FuncAPGMExpr(ident, args, location5);
             });
         });
@@ -1793,13 +1800,12 @@ function macro() {
             );
         });
     });
-    return macroKeyword.chain((location7)=>{
-        return macroIdentifier.chain((ident)=>{
-            return varAPGMExpr.sepBy(comma).wrap(leftParen, rightParen).chain((args)=>{
-                return mod.lazy(()=>apgmExpr()
-                ).map((body)=>{
-                    return new Macro(ident, args, body, location7);
-                });
+    return macroKeyword.and(macroIdentifier).chain(([location7, ident])=>{
+        return argExprs(()=>varAPGMExpr
+        ).chain((args)=>{
+            return mod.lazy(()=>apgmExpr()
+            ).map((body)=>{
+                return new Macro(ident, args, body, location7);
             });
         });
     });
