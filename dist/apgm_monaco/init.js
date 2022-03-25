@@ -62,7 +62,6 @@ export function initEditor(container) {
             editor.revealLine(1);
         },
         /**
-         *
          * @param {undefined | {
          * startLineNumber: number,
          * startColumn: number,
@@ -73,17 +72,17 @@ export function initEditor(container) {
          */
         setMarker(marker) {
             if (marker === undefined) {
-                monaco.editor.setModelMarkers(model, 'apgm', []);
+                monaco.editor.setModelMarkers(model, "apgm", []);
             } else {
-                monaco.editor.setModelMarkers(model, 'apgm', [{
+                monaco.editor.setModelMarkers(model, "apgm", [{
                     message: marker.message,
                     startLineNumber: marker.startLineNumber,
                     startColumn: marker.startColumn,
                     endColumn: marker.endColumn,
                     endLineNumber: marker.endLineNumber,
-                    severity: monaco.MarkerSeverity.Error
+                    severity: monaco.MarkerSeverity.Error,
                 }]);
             }
-        }
+        },
     };
 }

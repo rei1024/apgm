@@ -53,11 +53,10 @@ if (!($apgmInput instanceof HTMLElement)) {
 const editor = initEditor($apgmInput);
 
 /**
- *
  * @param {string} message
  */
 export function setMarkerForError(message) {
-    if (!message.includes('at line')) {
+    if (!message.includes("at line")) {
         return;
     }
     try {
