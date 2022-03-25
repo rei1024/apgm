@@ -135,7 +135,8 @@ export const completionItemProvider = {
         }
 
         const FUNC_KIND = monaco.languages.CompletionItemKind.Function;
-        const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+        const INSERT_AS_SNIPPET =
+            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
         /**
          * @type {any[]}
          */
@@ -148,7 +149,7 @@ export const completionItemProvider = {
                 insertText: `${funcName}`,
                 insertTextRules: INSERT_AS_SNIPPET,
                 documentation: `macro ${funcName}`,
-                detail: `macro ${funcName}`
+                detail: `macro ${funcName}`,
             });
         }
 
