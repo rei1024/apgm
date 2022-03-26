@@ -53,19 +53,17 @@ if (!($apgmInput instanceof HTMLElement)) {
 const editor = initEditor($apgmInput);
 
 /**
- * @param {string} message
+ * @param {{ message: string, apgmLocation: { line: number, column: number } }} e
  */
-export function setMarkerForError(message) {
-    if (!message.includes("at line")) {
-        return;
-    }
+export function setMarkerForError(e) {
     try {
-        const lineRes = message.match(/line (\d+)/);
-        const columnRes = message.match(/column (\d+)/);
-        const line = Number(lineRes[1]);
-        const column = Number(columnRes[1]);
+        const line = e.apgmLocation.line;
+        const column = e.apgmLocation.column;
+        if (!Number.isInteger(line)) {
+            return;
+        }
         editor.setMarker({
-            message: message,
+            message: e.message,
             startLineNumber: line,
             startColumn: column,
             endLineNumber: line,
@@ -108,7 +106,9 @@ const compile = () => {
         $copy.disabled = true;
         $apgmInput.style.borderColor = "#dc3545";
         $apgmInput.style.borderWidth = "2px";
-        setMarkerForError(message);
+        if (typeof e.apgmLocation !== "undefined") {
+            setMarkerForError(e);
+        }
     }
 };
 
@@ -150,11 +150,11 @@ $samples.forEach((sample) => {
         throw Error("sample is not HTMLElement");
     }
     sample.addEventListener("click", () => {
-        fetch(DATA_DIR + sample.dataset.src).then((x) => x.text()).then(
-            (str) => {
+        fetch(DATA_DIR + sample.dataset.src)
+            .then((x) => x.text())
+            .then((str) => {
                 editor.setValue(str);
                 editor.scrollToTop();
-            },
-        );
+            });
     });
 });
