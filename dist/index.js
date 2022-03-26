@@ -8,7 +8,7 @@ import { initEditor, initMonaco } from "./apgm_monaco/init.js";
 
 initMonaco();
 
-const $samples = document.querySelectorAll(".js_sample");
+const $examples = document.querySelectorAll(".js_example");
 
 const $output = document.querySelector("#output");
 if (!($output instanceof HTMLTextAreaElement)) {
@@ -40,6 +40,11 @@ if (!($error instanceof HTMLElement)) {
     throw Error("$error");
 }
 
+const $errorMsg = document.querySelector("#error_msg");
+if (!($errorMsg instanceof HTMLElement)) {
+    throw Error("$errorMsg");
+}
+
 const $prefix_input = document.querySelector("#prefix_input");
 if (!($prefix_input instanceof HTMLInputElement)) {
     throw Error("$prefix_input");
@@ -55,7 +60,7 @@ const editor = initEditor($apgmInput);
 /**
  * @param {{ message: string, apgmLocation: { line: number, column: number } }} e
  */
-export function setMarkerForError(e) {
+export function showError(e) {
     try {
         const line = e.apgmLocation.line;
         const column = e.apgmLocation.column;
@@ -69,6 +74,7 @@ export function setMarkerForError(e) {
             endLineNumber: line,
             endColumn: column + 3,
         });
+        editor.revealLine(line);
     } catch (_e) {
         // NOP
     }
@@ -100,14 +106,14 @@ const compile = () => {
          * @type {string}
          */
         const message = e.message;
-        $error.textContent = e.message;
+        $errorMsg.textContent = e.message;
         $error.style.display = "block";
         $download.disabled = true;
         $copy.disabled = true;
         $apgmInput.style.borderColor = "#dc3545";
         $apgmInput.style.borderWidth = "2px";
         if (typeof e.apgmLocation !== "undefined") {
-            setMarkerForError(e);
+            showError(e);
         }
     }
 };
@@ -121,7 +127,7 @@ $run.addEventListener("click", () => {
     // @ts-ignore
     if (!$copy.disabled) {
         const url = new URL(
-            "https://rei1024.github.io/proj/apgsembly-emulator-2/",
+            "https://rei1024.github.io/proj/apgsembly-emulator-2/"
         );
         localStorage.setItem("initial_code", $output.value);
         open(url);
@@ -145,14 +151,14 @@ const DATA_DIR = location.origin.includes("github")
     ? "./dist/data/"
     : "./dist/data/";
 
-$samples.forEach((sample) => {
-    if (!(sample instanceof HTMLElement)) {
-        throw Error("sample is not HTMLElement");
+$examples.forEach(example => {
+    if (!(example instanceof HTMLElement)) {
+        throw Error("example is not HTMLElement");
     }
-    sample.addEventListener("click", () => {
-        fetch(DATA_DIR + sample.dataset.src)
-            .then((x) => x.text())
-            .then((str) => {
+    example.addEventListener("click", () => {
+        fetch(DATA_DIR + example.dataset.src)
+            .then(x => x.text())
+            .then(str => {
                 editor.setValue(str);
                 editor.scrollToTop();
             });
