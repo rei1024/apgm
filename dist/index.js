@@ -8,7 +8,7 @@ import { initEditor, initMonaco } from "./apgm_monaco/init.js";
 
 initMonaco();
 
-const $samples = document.querySelectorAll(".js_sample");
+const $examples = document.querySelectorAll(".js_example");
 
 const $output = document.querySelector("#output");
 if (!($output instanceof HTMLTextAreaElement)) {
@@ -38,6 +38,11 @@ if (!($download instanceof HTMLButtonElement)) {
 const $error = document.querySelector("#error");
 if (!($error instanceof HTMLElement)) {
     throw Error("$error");
+}
+
+const $errorMsg = document.querySelector("#error_msg");
+if (!($errorMsg instanceof HTMLElement)) {
+    throw Error("$errorMsg");
 }
 
 const $prefix_input = document.querySelector("#prefix_input");
@@ -103,7 +108,7 @@ const compile = () => {
          * @type {string}
          */
         const message = e.message;
-        $error.textContent = e.message;
+        $errorMsg.textContent = e.message;
         $error.style.display = "block";
         $download.disabled = true;
         $copy.disabled = true;
@@ -146,12 +151,12 @@ const DATA_DIR = location.origin.includes("github")
     ? "./dist/data/"
     : "./dist/data/";
 
-$samples.forEach((sample) => {
-    if (!(sample instanceof HTMLElement)) {
-        throw Error("sample is not HTMLElement");
+$examples.forEach((example) => {
+    if (!(example instanceof HTMLElement)) {
+        throw Error("example is not HTMLElement");
     }
-    sample.addEventListener("click", () => {
-        fetch(DATA_DIR + sample.dataset.src).then((x) => x.text()).then(
+    example.addEventListener("click", () => {
+        fetch(DATA_DIR + example.dataset.src).then((x) => x.text()).then(
             (str) => {
                 editor.setValue(str);
                 editor.scrollToTop();
