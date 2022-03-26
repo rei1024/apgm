@@ -2667,7 +2667,7 @@ function removeComment(src) {
 }
 function completionParser(src) {
     const array = [];
-    for (const match1 of removeComment(src).matchAll(/(macro\s+(.*?)\s*\(.*?\))/gs)){
+    for (const match1 of removeComment(src).matchAll(/(macro\s+([a-zA-Z_][a-zA-Z_0-9]*?!)\s*\(.*?\))/gs)){
         const result = macroHead().parse(match1[0]);
         if (result.type === "ParseOK") {
             array.push({
