@@ -80,9 +80,15 @@ export function showError(e) {
     }
 }
 
+const resetError = () => {
+    editor.setMarker(undefined);
+    $error.style.display = "none";
+    $apgmInput.style.borderColor = "";
+};
+
 const compile = () => {
     $output.value = "";
-    editor.setMarker(undefined);
+    resetError();
     try {
         const options = {};
         if ($prefix_input.value.trim() !== "") {
@@ -93,19 +99,14 @@ const compile = () => {
          * @type {string}
          */
         const result = integration(editor.getValue(), options).join("\n");
+        $output.value = result;
         $download.disabled = false;
         $copy.disabled = false;
-        $error.style.display = "none";
-        $output.value = result;
-        $apgmInput.style.borderColor = "";
     } catch (e) {
         if (!(e instanceof Error)) {
             e = new Error("unknown error");
         }
-        /**
-         * @type {string}
-         */
-        const message = e.message;
+
         $errorMsg.textContent = e.message;
         $error.style.display = "block";
         $download.disabled = true;
@@ -127,7 +128,7 @@ $run.addEventListener("click", () => {
     // @ts-ignore
     if (!$copy.disabled) {
         const url = new URL(
-            "https://rei1024.github.io/proj/apgsembly-emulator-2/",
+            "https://rei1024.github.io/proj/apgsembly-emulator-2/"
         );
         localStorage.setItem("initial_code", $output.value);
         open(url);
@@ -151,16 +152,19 @@ const DATA_DIR = location.origin.includes("github")
     ? "./dist/data/"
     : "./dist/data/";
 
-$examples.forEach((example) => {
+$examples.forEach(example => {
     if (!(example instanceof HTMLElement)) {
         throw Error("example is not HTMLElement");
     }
     example.addEventListener("click", () => {
         fetch(DATA_DIR + example.dataset.src)
-            .then((x) => x.text())
-            .then((str) => {
+            .then(x => x.text())
+            .then(str => {
                 editor.setValue(str);
                 editor.scrollToTop();
+                setTimeout(() => {
+                    compile();
+                }, 0);
             });
     });
 });
