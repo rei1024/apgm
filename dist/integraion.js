@@ -1832,10 +1832,11 @@ function macro() {
         });
     });
 }
+const anythingLine = mod.match(/.*/);
 const header = mod.text("#").next(mod.match(/REGISTERS|COMPONENTS/)).desc([
     "#REGISTERS",
     "#COMPONENTS"
-]).chain((x)=>mod.match(/.*/).map((c)=>new Header(x, c)
+]).chain((x)=>anythingLine.map((c)=>new Header(x, c)
     )
 );
 const headers = _.next(header).skip(_).repeat();
