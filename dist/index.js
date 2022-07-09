@@ -5,55 +5,32 @@
 import { integration } from "./integraion.js";
 import { downloadBlob } from "./download.js";
 import { initEditor, initMonaco } from "./apgm_monaco/init.js";
+import { $$ } from "./selector.js";
 
 initMonaco();
 
+const $examplesButton = $$("#examples", HTMLButtonElement);
 const $examples = document.querySelectorAll(".js_example");
 
-const $output = document.querySelector("#output");
-if (!($output instanceof HTMLTextAreaElement)) {
-    throw Error("$output");
-}
+const $output = $$("#output", HTMLTextAreaElement);
 
-const $compile = document.querySelector("#compile");
-if (!($compile instanceof HTMLButtonElement)) {
-    throw Error("$compile");
-}
+const $compile = $$("#compile", HTMLButtonElement);
 
-const $run = document.querySelector("#run");
-if (!($run instanceof HTMLButtonElement)) {
-    throw Error("$run");
-}
+const $run = $$("#run", HTMLButtonElement);
 
-const $copy = document.querySelector("#copy");
-if (!($copy instanceof HTMLButtonElement)) {
-    throw Error("$copy");
-}
+const $copy = $$("#copy", HTMLButtonElement);
 
-const $download = document.querySelector("#download");
-if (!($download instanceof HTMLButtonElement)) {
-    throw Error("$download");
-}
+const $download = $$("#download", HTMLButtonElement);
 
-const $error = document.querySelector("#error");
-if (!($error instanceof HTMLElement)) {
-    throw Error("$error");
-}
+const $error = $$("#error", HTMLElement);
 
-const $errorMsg = document.querySelector("#error_msg");
-if (!($errorMsg instanceof HTMLElement)) {
-    throw Error("$errorMsg");
-}
+const $errorMsg = $$("#error_msg", HTMLElement);
 
-const $prefix_input = document.querySelector("#prefix_input");
-if (!($prefix_input instanceof HTMLInputElement)) {
-    throw Error("$prefix_input");
-}
+const $prefix_input = $$("#prefix_input", HTMLInputElement);
 
-const $apgmInput = document.querySelector("#apgm_input");
-if (!($apgmInput instanceof HTMLElement)) {
-    throw Error("$apgmInput");
-}
+const $apgmInput = $$("#apgm_input", HTMLElement);
+
+const $configButton = $$("#config_button", HTMLButtonElement);
 
 const editor = initEditor($apgmInput);
 
@@ -180,3 +157,10 @@ $examples.forEach((example) => {
             });
     });
 });
+
+$compile.disabled = false;
+$run.disabled = false;
+$examplesButton.disabled = false;
+$configButton.disabled = false;
+$copy.disabled = false;
+$download.disabled = false;

@@ -61,9 +61,9 @@
     <main class="container">
         <div class="mt-0 ms-0">
             <div id="buttons" class="btn-group">
-                <button id="compile" class="btn btn-primary">Compile</button>
-                <button id="run" class="btn btn-primary">Run</button>
-                <button type="button" class="btn btn-primary dropdown-toggle" id="examples" data-bs-toggle="dropdown" aria-expanded="false">Example</button>
+                <button disabled id="compile" class="btn btn-primary">Compile</button>
+                <button disabled id="run" class="btn btn-primary">Run</button>
+                <button disabled type="button" class="btn btn-primary dropdown-toggle" id="examples" data-bs-toggle="dropdown" aria-expanded="false">Example</button>
                 <ul class="dropdown-menu" aria-labelledby="examples">
                     <li>
                         <button class="dropdown-item js_example" data-src="01_output.apgm">output</button>
@@ -81,12 +81,12 @@
                         <button class="dropdown-item js_example" data-src="14_o_sqrt_log_t.apgm">O(sqrt(log(t)))</button>
                     </li>
                 </ul>
-                <button id="config_button" data-test="config_button" type="button" class="btn btn-primary"
+                <button disabled id="config_button" data-test="config_button" type="button" class="btn btn-primary"
                     data-bs-toggle="modal" data-bs-target="#config_modal">
                     Config
                 </button>
-                <button id="copy" disabled class="btn btn-primary">Copy</button>
-                <button id="download" disabled class="btn btn-primary">Download</button>
+                <button disabled id="copy" disabled class="btn btn-primary">Copy</button>
+                <button disabled id="download" disabled class="btn btn-primary">Download</button>
             </div>
         </div>
         <div class="mt-2 main_content">

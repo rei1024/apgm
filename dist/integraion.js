@@ -638,9 +638,9 @@ class BRegAction extends Action {
         }
         if (op === B_INC_STRING || op === B_TDEC_STRING || op === B_READ_STRING || op === B_SET_STRING) {
             if (reg.startsWith(B_STRING)) {
-                const str = reg.slice(1);
-                if (/^[0-9]+$/u.test(str)) {
-                    return new BRegAction(parseOp2(op), parseInt(str, 10));
+                const str1 = reg.slice(1);
+                if (/^[0-9]+$/u.test(str1)) {
+                    return new BRegAction(parseOp2(op), parseInt(str1, 10));
                 }
             }
         }
@@ -847,9 +847,9 @@ class URegAction extends Action {
         }
         if (op === U_INC_STRING || op === U_TDEC_STRING) {
             if (reg.startsWith(U_STRING) || reg.startsWith(R_STRING)) {
-                const str = reg.slice(1);
-                if (/^[0-9]+$/u.test(str)) {
-                    return new URegAction(parseOp5(op), parseInt(str, 10));
+                const str1 = reg.slice(1);
+                if (/^[0-9]+$/u.test(str1)) {
+                    return new URegAction(parseOp5(op), parseInt(str1, 10));
                 }
             }
         }
@@ -929,9 +929,9 @@ class LegacyTRegAction extends Action {
         }
         if (op === T_INC_STRING || op === T_DEC_STRING || op === T_READ_STRING || op === T_SET_STRING || op === T_RESET_STRING) {
             if (reg.startsWith("T")) {
-                const str = reg.slice(1);
-                if (/^[0-9]+$/u.test(str)) {
-                    return new LegacyTRegAction(parseOp6(op), parseInt(str, 10));
+                const str1 = reg.slice(1);
+                if (/^[0-9]+$/u.test(str1)) {
+                    return new LegacyTRegAction(parseOp6(op), parseInt(str1, 10));
                 }
             }
         }
@@ -1454,19 +1454,19 @@ class ErrorWithLocation extends Error {
     }
     apgmLocation;
 }
-function formatLocationAt(location1) {
-    if (location1 !== undefined) {
-        return ` at line ${location1.line} column ${location1.column}`;
+function formatLocationAt(location) {
+    if (location !== undefined) {
+        return ` at line ${location.line} column ${location.column}`;
     } else {
         return "";
     }
 }
 class FuncAPGMExpr extends APGMExpr {
-    constructor(name, args, location3){
+    constructor(name, args, location){
         super();
         this.name = name;
         this.args = args;
-        this.location = location3;
+        this.location = location;
     }
     transform(f) {
         return f(new FuncAPGMExpr(this.name, this.args.map((x)=>x.transform(f)), this.location));
@@ -1514,11 +1514,11 @@ class LoopAPGMExpr extends APGMExpr {
     body;
 }
 class Macro {
-    constructor(name, args, body, location4){
+    constructor(name, args, body, location){
         this.name = name;
         this.args = args;
         this.body = body;
-        this.location = location4;
+        this.location = location;
     }
     pretty() {
         return `${this.name}(${this.args.map((x)=>x.pretty()).join(", ")}) ${this.body}`;
@@ -1529,9 +1529,9 @@ class Macro {
     location;
 }
 class Main {
-    constructor(macros, headers1, seqExpr){
+    constructor(macros, headers, seqExpr){
         this.macros = macros;
-        this.headers = headers1;
+        this.headers = headers;
         this.seqExpr = seqExpr;
         if (macros.length >= 1) {
             if (!(macros[0] instanceof Macro)) {
@@ -1556,10 +1556,10 @@ class Header {
     content;
 }
 class NumberAPGMExpr extends APGMExpr {
-    constructor(value, location5){
+    constructor(value, location){
         super();
         this.value = value;
-        this.location = location5;
+        this.location = location;
     }
     transform(f) {
         return f(this);
@@ -1571,10 +1571,10 @@ class NumberAPGMExpr extends APGMExpr {
     location;
 }
 class StringAPGMExpr extends APGMExpr {
-    constructor(value, location6){
+    constructor(value, location){
         super();
         this.value = value;
-        this.location = location6;
+        this.location = location;
     }
     transform(f) {
         return f(this);
@@ -1599,10 +1599,10 @@ class SeqAPGMExpr extends APGMExpr {
     exprs;
 }
 class VarAPGMExpr extends APGMExpr {
-    constructor(name, location7){
+    constructor(name, location){
         super();
         this.name = name;
-        this.location = location7;
+        this.location = location;
     }
     transform(f) {
         return f(this);
@@ -1630,12 +1630,12 @@ class WhileAPGMExpr extends APGMExpr {
     cond;
     body;
 }
-function prettyError(fail1, source) {
+function prettyError(fail, source) {
     const lines = source.split(/\n|\r\n/);
-    const above = lines[fail1.location.line - 2];
-    const errorLine = lines[fail1.location.line - 1];
-    const below = lines[fail1.location.line];
-    const arrowLine = " ".repeat(Math.max(0, fail1.location.column - 1)) + "^";
+    const above = lines[fail.location.line - 2];
+    const errorLine = lines[fail.location.line - 1];
+    const below = lines[fail.location.line];
+    const arrowLine = " ".repeat(Math.max(0, fail.location.column - 1)) + "^";
     const aboveLines = [
         ...above === undefined ? [] : [
             above
@@ -1654,8 +1654,8 @@ function prettyError(fail1, source) {
         ...belowLines.map((x)=>prefix + x), 
     ];
     return [
-        `parse error at line ${fail1.location.line} column ${fail1.location.column}:`,
-        `  expected ${fail1.expected.join(", ")}`,
+        `parse error at line ${fail.location.line} column ${fail.location.column}:`,
+        `  expected ${fail.expected.join(", ")}`,
         ``,
         ...errorLines, 
     ].join("\n");
@@ -1719,10 +1719,10 @@ function argExprs(arg) {
     return mod.lazy(()=>arg()).sepBy(comma).wrap(leftParen, rightParen);
 }
 function funcAPGMExpr() {
-    return _.next(mod.location).chain((location8)=>{
+    return _.next(mod.location).chain((location)=>{
         return mod.choice(macroIdentifier, identifier).chain((ident)=>{
             return argExprs(()=>apgmExpr()).map((args)=>{
-                return new FuncAPGMExpr(ident, args, location8);
+                return new FuncAPGMExpr(ident, args, location);
             });
         });
     });
@@ -1754,11 +1754,11 @@ function loopAPGMExpr() {
 }
 const ifKeyword = mod.choice(token("if_z"), token("if_nz")).map((x)=>x === "if_z" ? "Z" : "NZ");
 function ifAPGMExpr() {
-    return ifKeyword.chain((mod2)=>{
+    return ifKeyword.chain((mod1)=>{
         return exprWithParen.chain((cond)=>{
             return mod.lazy(()=>apgmExpr()).chain((body)=>{
                 return mod.choice(token("else").next(mod.lazy(()=>apgmExpr())), mod.ok(undefined)).map((elseBody)=>{
-                    return new IfAPGMExpr(mod2, cond, body, elseBody);
+                    return new IfAPGMExpr(mod1, cond, body, elseBody);
                 });
             });
         });
@@ -1766,14 +1766,14 @@ function ifAPGMExpr() {
 }
 function macroHead() {
     const macroKeyword = _.chain((_)=>{
-        return mod.location.chain((location9)=>{
-            return mod.text("macro").next(someSpaces).map((_)=>location9);
+        return mod.location.chain((location)=>{
+            return mod.text("macro").next(someSpaces).map((_)=>location);
         });
     });
-    return macroKeyword.and(macroIdentifier).chain(([location10, ident])=>{
+    return macroKeyword.and(macroIdentifier).chain(([location, ident])=>{
         return argExprs(()=>varAPGMExpr).map((args)=>{
             return {
-                loc: location10,
+                loc: location,
                 name: ident,
                 args: args
             };
@@ -2258,17 +2258,17 @@ class Transpiler {
         }
         let seq = [];
         let state = ctx.input;
-        for (const [i, expr] of seqExpr.exprs.entries()){
+        for (const [i, expr1] of seqExpr.exprs.entries()){
             if (i === 0) {
                 const outputState = this.getFreshName();
-                seq = seq.concat(this.transpileExpr(new Context1(state, outputState, ctx.inputZNZ), expr));
+                seq = seq.concat(this.transpileExpr(new Context1(state, outputState, ctx.inputZNZ), expr1));
                 state = outputState;
             } else if (i === seqExpr.exprs.length - 1) {
-                seq = seq.concat(this.transpileExpr(new Context1(state, ctx.output, "*"), expr));
+                seq = seq.concat(this.transpileExpr(new Context1(state, ctx.output, "*"), expr1));
             } else {
-                const outputState = this.getFreshName();
-                seq = seq.concat(this.transpileExpr(new Context1(state, outputState, "*"), expr));
-                state = outputState;
+                const outputState1 = this.getFreshName();
+                seq = seq.concat(this.transpileExpr(new Context1(state, outputState1, "*"), expr1));
+                state = outputState1;
             }
         }
         return seq;
@@ -2406,16 +2406,16 @@ function dups(as) {
 function argumentsMessage(num) {
     return `${num} argument${num === 1 ? "" : "s"}`;
 }
-function replaceVarInBoby(macro1, funcExpr) {
+function replaceVarInBoby(macro, funcExpr) {
     const exprs = funcExpr.args;
-    if (exprs.length !== macro1.args.length) {
-        throw new ErrorWithLocation(`argument length mismatch: "${macro1.name}"` + ` expect ${argumentsMessage(macro1.args.length)} but given ${argumentsMessage(exprs.length)}${formatLocationAt(funcExpr.location)}`, funcExpr.location);
+    if (exprs.length !== macro.args.length) {
+        throw new ErrorWithLocation(`argument length mismatch: "${macro.name}"` + ` expect ${argumentsMessage(macro.args.length)} but given ${argumentsMessage(exprs.length)}${formatLocationAt(funcExpr.location)}`, funcExpr.location);
     }
-    const nameToExpr = new Map(macro1.args.map((a, i)=>[
+    const nameToExpr = new Map(macro.args.map((a, i)=>[
             a.name,
             exprs[i]
         ]));
-    return macro1.body.transform((x)=>{
+    return macro.body.transform((x)=>{
         if (x instanceof VarAPGMExpr) {
             const expr = nameToExpr.get(x.name);
             if (expr === undefined) {
@@ -2432,17 +2432,17 @@ class MacroExpander {
     count = 0;
     maxCount = 100000;
     main;
-    constructor(main1){
-        this.main = main1;
-        this.macroMap = new Map(main1.macros.map((m)=>[
+    constructor(main){
+        this.main = main;
+        this.macroMap = new Map(main.macros.map((m)=>[
                 m.name,
                 m
             ]));
-        if (this.macroMap.size < main1.macros.length) {
-            const ds = dups(main1.macros.map((x)=>x.name));
+        if (this.macroMap.size < main.macros.length) {
+            const ds = dups(main.macros.map((x)=>x.name));
             const d = ds[0];
-            const location11 = main1.macros.slice().reverse().find((x)=>x.name === d)?.location;
-            throw new ErrorWithLocation(`There is a macro with the same name: "${d}"` + formatLocationAt(location11), location11);
+            const location = main.macros.slice().reverse().find((x)=>x.name === d)?.location;
+            throw new ErrorWithLocation(`There is a macro with the same name: "${d}"` + formatLocationAt(location), location);
         }
     }
     expand() {
@@ -2463,17 +2463,17 @@ class MacroExpander {
         }
     }
     expandFuncAPGMExpr(funcExpr) {
-        const macro2 = this.macroMap.get(funcExpr.name);
-        if (macro2 !== undefined) {
-            const expanded = replaceVarInBoby(macro2, funcExpr);
+        const macro = this.macroMap.get(funcExpr.name);
+        if (macro !== undefined) {
+            const expanded = replaceVarInBoby(macro, funcExpr);
             return this.expandExpr(expanded);
         } else {
             return funcExpr;
         }
     }
 }
-function expand(main2) {
-    return new MacroExpander(main2).expand();
+function expand(main) {
+    return new MacroExpander(main).expand();
 }
 function optimize(expr) {
     return expr.transform(optimizeOnce);
@@ -2597,8 +2597,8 @@ function removeComment(src) {
 }
 function completionParser(src) {
     const array = [];
-    for (const match1 of removeComment(src).matchAll(/(macro\s+([a-zA-Z_][a-zA-Z_0-9]*?!)\s*\(.*?\))/gs)){
-        const result = macroHead().parse(match1[0]);
+    for (const match of removeComment(src).matchAll(/(macro\s+([a-zA-Z_][a-zA-Z_0-9]*?!)\s*\(.*?\))/gs)){
+        const result = macroHead().parse(match[0]);
         if (result.type === "ParseOK") {
             array.push({
                 name: result.value.name,
@@ -2624,11 +2624,11 @@ function integration(str, options = {}, log = false) {
     const seqOptimizedAPGL = logged(optimizeSeq, apgl, log ? "optimized apgl seq" : undefined);
     const optimizedAPGL = logged(optimize, seqOptimizedAPGL, log ? "optimized apgl action" : undefined);
     const apgs = transpileAPGL(optimizedAPGL, options);
-    const comment1 = [
+    const comment = [
         "# State    Input    Next state    Actions",
         "# ---------------------------------------", 
     ];
     const head = apgm.headers.map((x)=>x.toString());
-    return head.concat(comment1, apgs);
+    return head.concat(comment, apgs);
 }
 export { integration as integration };
