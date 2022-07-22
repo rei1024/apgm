@@ -378,6 +378,7 @@ class Action {
 const ADD_A1_STRING = "A1";
 const ADD_B0_STRING = "B0";
 const ADD_B1_STRING = "B1";
+const ADD_STRING = "ADD";
 function prettyOp(op) {
     switch(op){
         case 0:
@@ -404,7 +405,7 @@ class AddAction extends Action {
         this.op = op;
     }
     pretty() {
-        return `ADD ${prettyOp(this.op)}`;
+        return `${ADD_STRING} ${prettyOp(this.op)}`;
     }
     static parse(str) {
         const array = str.trim().split(/\s+/u);
@@ -412,7 +413,7 @@ class AddAction extends Action {
             return undefined;
         }
         const [add, reg] = array;
-        if (add !== "ADD") {
+        if (add !== ADD_STRING) {
             return undefined;
         }
         if (reg === ADD_A1_STRING || reg === ADD_B0_STRING || reg === ADD_B1_STRING) {
@@ -668,6 +669,7 @@ class BRegAction extends Action {
 }
 const MUL_0_STRING = "0";
 const MUL_1_STRING = "1";
+const MUL_STRING = "MUL";
 function parseOp3(op) {
     switch(op){
         case MUL_0_STRING:
@@ -690,7 +692,7 @@ class MulAction extends Action {
         this.op = op;
     }
     pretty() {
-        return `MUL ${prettyOp3(this.op)}`;
+        return `${MUL_STRING} ${prettyOp3(this.op)}`;
     }
     static parse(str) {
         const array = str.trim().split(/\s+/u);
@@ -698,7 +700,7 @@ class MulAction extends Action {
             return undefined;
         }
         const [mul, op] = array;
-        if (mul !== "MUL") {
+        if (mul !== MUL_STRING) {
             return undefined;
         }
         if (op === MUL_0_STRING || op === MUL_1_STRING) {
@@ -746,6 +748,7 @@ class OutputAction extends Action {
 const SUB_A1_STRING = "A1";
 const SUB_B0_STRING = "B0";
 const SUB_B1_STRING = "B1";
+const SUB_STRING = "SUB";
 function prettyOp4(op) {
     switch(op){
         case 0:
@@ -772,7 +775,7 @@ class SubAction extends Action {
         this.op = op;
     }
     pretty() {
-        return `SUB ${prettyOp4(this.op)}`;
+        return `${SUB_STRING} ${prettyOp4(this.op)}`;
     }
     static parse(str) {
         const array = str.trim().split(/\s+/u);
@@ -780,7 +783,7 @@ class SubAction extends Action {
             return undefined;
         }
         const [sub, reg] = array;
-        if (sub !== "SUB") {
+        if (sub !== SUB_STRING) {
             return undefined;
         }
         if (reg === SUB_A1_STRING || reg === SUB_B0_STRING || reg === SUB_B1_STRING) {
@@ -1172,7 +1175,7 @@ class Command extends ProgramLine {
         }
         const input = parseInput(inputStr);
         if (input === undefined) {
-            return `Unknown input "${inputStr}" at "${str}"`;
+            return `Unknown input "${inputStr}" at "${str}". Expect "Z", "NZ", "ZZ", or "*"`;
         }
         return new Command({
             state: state,
@@ -1351,10 +1354,34 @@ function validateAll(commands) {
     return undefined;
 }
 class Program {
-    constructor({ commands , componentsHeader , registersHeader , programLines ,  }){
-        this.commands = commands;
-        this.componentsHeader = componentsHeader;
-        this.registersHeader = registersHeader;
+    constructor({ programLines ,  }){
+        this.commands = programLines.getArray().flatMap((x)=>{
+            if (x instanceof Command) {
+                return [
+                    x
+                ];
+            } else {
+                return [];
+            }
+        });
+        this.componentsHeader = undefined;
+        for (const x of programLines.getArray()){
+            if (x instanceof ComponentsHeader) {
+                if (this.componentsHeader !== undefined) {
+                    throw Error(`Multiple ${ComponentsHeader.key}`);
+                }
+                this.componentsHeader = x;
+            }
+        }
+        this.registersHeader = undefined;
+        for (const x1 of programLines.getArray()){
+            if (x1 instanceof RegistersHeader) {
+                if (this.registersHeader !== undefined) {
+                    throw new Error(`Multiple ${RegistersHeader.key}`);
+                }
+                this.registersHeader = x1;
+            }
+        }
         this.programLines = programLines;
     }
     static parse(str) {
@@ -1363,21 +1390,9 @@ class Program {
             return programLines;
         }
         const commands = [];
-        let registersHeader = undefined;
-        let componentsHeader = undefined;
         for (const programLine of programLines.getArray()){
             if (programLine instanceof Command) {
                 commands.push(programLine);
-            } else if (programLine instanceof ComponentsHeader) {
-                if (componentsHeader !== undefined) {
-                    return `Multiple ${ComponentsHeader.key}`;
-                }
-                componentsHeader = programLine;
-            } else if (programLine instanceof RegistersHeader) {
-                if (registersHeader !== undefined) {
-                    return `Multiple ${RegistersHeader.key}`;
-                }
-                registersHeader = programLine;
             }
         }
         if (commands.length === 0) {
@@ -1387,20 +1402,13 @@ class Program {
         if (typeof errorOrUndefined === 'string') {
             return errorOrUndefined;
         }
-        return new Program({
-            commands: commands,
-            registersHeader: registersHeader,
-            componentsHeader: componentsHeader,
-            programLines: programLines
-        });
-    }
-    reconstructProgramLines() {
-        return new Program({
-            commands: this.commands,
-            componentsHeader: this.componentsHeader,
-            registersHeader: this.registersHeader,
-            programLines: new ProgramLines(this.commands.slice())
-        });
+        try {
+            return new Program({
+                programLines: programLines
+            });
+        } catch (error) {
+            return error.message;
+        }
     }
     _actions() {
         return this.commands.flatMap((command)=>command.actions);
@@ -1415,19 +1423,7 @@ class Program {
         return sortNub(this._actions().flatMap((a)=>a.extractLegacyTRegisterNumbers()));
     }
     pretty() {
-        if (this.commands.length >= 1 && this.programLines.getArray().length === 0) {
-            let str = "";
-            if (this.componentsHeader !== undefined) {
-                str += this.componentsHeader.pretty() + "\n";
-            }
-            if (this.registersHeader !== undefined) {
-                str += this.registersHeader.pretty() + "\n";
-            }
-            str += this.commands.map((command)=>command.pretty()).join('\n');
-            return str.trim();
-        } else {
-            return this.programLines.pretty();
-        }
+        return this.programLines.pretty();
     }
 }
 function sortNub(array) {
