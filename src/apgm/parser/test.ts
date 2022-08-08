@@ -6,9 +6,9 @@ import {
     identifier,
     identifierOnly,
     ifAPGMExpr,
+    macro,
     main,
     stringLit,
-macro,
 } from "./mod.ts";
 import { SeqAPGMExpr } from "../ast/mod.ts";
 import { assertEquals, assertThrows, test } from "../../deps_test.ts";
