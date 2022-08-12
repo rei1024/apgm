@@ -20,11 +20,11 @@
     "tasks": {
         "commit": "deno task fmt && deno task bundle && deno task t && git add . && git commit -m",
         // test
-        "t": "deno test --config=deno.jsonc --parallel",
+        "t": "deno test --parallel",
         // test with watcher
-        "w": "deno test --watch --no-check --config=deno.jsonc",
+        "w": "deno test --watch --no-check .",
         // formatting
-        "fmt": "deno fmt --config=deno.jsonc",
+        "fmt": "deno fmt",
         // reload dependency
         "reload": "deno test --reload",
         // local server
@@ -32,6 +32,6 @@
         // bundle
         "bundle": "deno run --allow-read --allow-write --allow-env --allow-net bundle.ts",
         // coverage
-        "cov": "rm ./coverage -r && rm ./coverage.lcov && deno test --config=deno.jsonc --coverage=coverage && deno coverage coverage --lcov --output=coverage.lcov && genhtml -o coverage/html coverage.lcov && open coverage/html/index.html"
+        "cov": "rm ./coverage -r && rm ./coverage.lcov && deno test --coverage=coverage && deno coverage coverage --lcov --output=coverage.lcov && genhtml -o coverage/html coverage.lcov && open coverage/html/index.html"
     }
 }
