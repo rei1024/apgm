@@ -14,7 +14,7 @@
             "indentWidth": 4
         },
         "files": {
-            "exclude": ["coverage"]
+            "exclude": ["coverage", "./dist/integration.js"]
         }
     },
     "tasks": {

@@ -2,7 +2,7 @@
 
 // deno.enable = false
 
-import { integration } from "./integraion.js";
+import { integration } from "./integration.js";
 import { downloadBlob } from "./download.js";
 import { initEditor, initMonaco } from "./apgm_monaco/init.js";
 import { setupCopy } from "./copy.js";
