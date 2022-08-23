@@ -219,7 +219,8 @@ test("parser: main", () => {
         const m = main().tryParse(c);
         const mPretty = m.pretty();
         try {
-            main().tryParse(mPretty);
+            const m2 = main().tryParse(mPretty);
+            assertEquals(mPretty, m2.pretty());
         } catch (error) {
             throw Error(`Parse Error for: "${c}" -> "${mPretty}"`, {
                 cause: error instanceof Error ? error : undefined,
