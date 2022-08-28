@@ -62,7 +62,7 @@ export function showError(e) {
 
 const resetError = () => {
     editor.setMarker(undefined);
-    $error.style.display = "none";
+    $error.classList.add("d-none");
     $apgmInput.style.borderColor = "";
     $output.style.borderColor = "";
     $compile.style.backgroundColor = "";
@@ -100,7 +100,7 @@ const compile = (withReaction = true) => {
         }
 
         $errorMsg.textContent = e.message;
-        $error.style.display = "block";
+        $error.classList.remove("d-none");
         $download.disabled = true;
         $copy.disabled = true;
         if (withReaction) {

@@ -3,6 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSP -->
+    <!-- `data://*` is close button for modal -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        style-src 'self' 'unsafe-inline'
+            cdn.jsdelivr.net cdnjs.cloudflare.com;
+        script-src 'self' 'unsafe-inline'
+            cdn.jsdelivr.net cdnjs.cloudflare.com
+            blob://*;
+        img-src 'self' data://*;
+        object-src 'none';
+        font-src cdnjs.cloudflare.com">
+
     <title>APGM - APGsembly macro language</title>
 
     <meta name="robots" content="noindex">
@@ -27,13 +41,9 @@
 
     <!-- Monaco -->
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/editor/editor.main.min.css">
-    <script>
-        var require = {
-            paths: {
-                'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs'
-            }
-        };
-    </script>
+
+    <!-- no defer -->
+    <script src="./define-require.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/editor/editor.main.nls.js"></script>
@@ -56,7 +66,7 @@
 </head>
 <body>
     <header class="mt-3 text-center">
-        <h1 style="font-size: x-large;">APGM - APGsembly macro language</h1>
+        <h1 class="font-x-large">APGM - APGsembly macro language</h1>
     </header>
     <main class="container">
         <div class="mt-0 ms-0">
@@ -90,11 +100,11 @@
             </div>
         </div>
         <div class="mt-2 main_content">
-            <div id="apgm_input" style="border:1px solid black;"></div>
+            <div id="apgm_input" class="input-border"></div>
             <textarea placeholder="# APGsembly" id="output" class="form-control mono" cols="30" rows="9"></textarea>
         </div>
         <div class="mt-1">
-            <div id="error" style="display: none;" class="alert alert-danger" role="alert"><pre id="error_msg" style="white-space: pre-wrap;"></pre></div>
+            <div id="error" class="d-none alert alert-danger" role="alert"><pre id="error_msg" class="white-space-pre-wrap"></pre></div>
         </div>
 
         <!-- <div class="mt-2">
