@@ -1,4 +1,4 @@
-import { bundle } from "https://deno.land/x/emit@0.6.0/mod.ts";
+import { bundle } from "https://deno.land/x/emit@0.8.0/mod.ts";
 
 const result = await bundle("./src/integration/mod.ts");
 const { code } = result;
