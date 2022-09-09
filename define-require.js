@@ -1,4 +1,6 @@
+// deno-lint-ignore-file
 // global
+
 var require = {
     paths: {
         "vs":
