@@ -162,8 +162,10 @@ $watchMode.addEventListener("change", () => {
         id = setInterval(() => {
             compile(false);
         }, 500);
+        $compile.disabled = true;
     } else {
         clearInterval(id);
+        $compile.disabled = false;
     }
 });
 

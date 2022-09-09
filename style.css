@@ -22,7 +22,7 @@
 
 #apgm_input {
     width: 60%;
-    height: 475px;
+    height: calc(100vh - 150px);
 }
 
 #output {
