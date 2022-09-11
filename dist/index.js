@@ -38,23 +38,36 @@ const $configButton = $$("#config_button", HTMLButtonElement);
 const editor = initEditor($apgmInput);
 
 /**
- * @param {{ message: string, apgmLocation: { line: number, column: number } }} e
+ * @typedef {{ line: number, column: number }} Loc
+ */
+
+/**
+ * @param {{ message: string, apgmSpan?: { start: Loc, end: Loc }, apgmLocation?: Loc }} e
  */
 export function showError(e) {
     try {
-        const line = e.apgmLocation.line;
-        const column = e.apgmLocation.column;
-        if (!Number.isInteger(line)) {
+        if (!e.apgmSpan) {
+            if (e.apgmLocation) {
+                editor.setMarker({
+                    message: e.message,
+                    startLineNumber: e.apgmLocation.line,
+                    startColumn: e.apgmLocation.column,
+                    endLineNumber: e.apgmLocation.line,
+                    endColumn: e.apgmLocation.column + 3,
+                });
+                editor.revealLine(e.apgmLocation.line);
+            }
             return;
         }
+
         editor.setMarker({
             message: e.message,
-            startLineNumber: line,
-            startColumn: column,
-            endLineNumber: line,
-            endColumn: column + 3,
+            startLineNumber: e.apgmSpan.start.line,
+            startColumn: e.apgmSpan.start.column,
+            endLineNumber: e.apgmSpan.end.line,
+            endColumn: e.apgmSpan.end.column,
         });
-        editor.revealLine(line);
+        editor.revealLine(e.apgmSpan.start.line);
     } catch (_e) {
         // ignore
     }
