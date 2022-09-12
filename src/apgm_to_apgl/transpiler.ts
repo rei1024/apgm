@@ -225,9 +225,11 @@ export function transpileAPGMExpr(e: APGMExpr): APGLExpr {
         return new SeqAPGLExpr(e.exprs.map((x) => t(x)));
     } else if (e instanceof StringAPGMExpr) {
         throw new ErrorWithLocation(
-            `string is not allowed: ${e.pretty()}${formatLocationAt(e.span?.start)}`,
+            `string is not allowed: ${e.pretty()}${
+                formatLocationAt(e.span?.start)
+            }`,
             e.span?.start,
-            e.span
+            e.span,
         );
     } else if (e instanceof VarAPGMExpr) {
         throw new ErrorWithLocation(

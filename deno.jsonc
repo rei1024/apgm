@@ -18,9 +18,9 @@
         }
     },
     "tasks": {
-        "commit": "deno task fmt && deno task bundle && deno task t && git add . && git commit -m",
+        "commit": "deno task fmt --check && deno task bundle && deno task t && git add . && git commit -m",
         // test
-        "pre-commit-hook": "deno run --allow-read --allow-write --allow-env --allow-net bundle.ts check",
+        "pre-commit-hook": "deno task fmt && deno task t && deno run --allow-read --allow-write --allow-env --allow-net bundle.ts check",
         "t": "deno test --parallel",
         // test with watcher
         "w": "deno test --watch --no-check .",

@@ -2,8 +2,11 @@ import { bundle } from "https://deno.land/x/emit@0.9.0/mod.ts";
 
 import * as swc from "https://deno.land/x/swc@0.2.1/mod.ts";
 
-async function bundleOrCheck(bundleEntryPath: string, outputPath: string, check: boolean) {
-
+async function bundleOrCheck(
+    bundleEntryPath: string,
+    outputPath: string,
+    check: boolean,
+) {
     const result = await bundle(bundleEntryPath);
 
     const { code } = result;
@@ -27,4 +30,8 @@ async function bundleOrCheck(bundleEntryPath: string, outputPath: string, check:
     }
 }
 
-await bundleOrCheck("./src/integration/mod.ts", "./dist/integration.js", Deno.args.includes("check"));
+await bundleOrCheck(
+    "./src/integration/mod.ts",
+    "./dist/integration.js",
+    Deno.args.includes("check"),
+);

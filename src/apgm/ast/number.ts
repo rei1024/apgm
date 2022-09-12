@@ -4,7 +4,7 @@ export class NumberAPGMExpr extends APGMExpr {
     constructor(
         public readonly value: number,
         public readonly span?: APGMSourceSpan | undefined,
-        public readonly raw?: string
+        public readonly raw?: string,
     ) {
         super();
     }
