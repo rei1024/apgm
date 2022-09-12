@@ -112,18 +112,24 @@ export function funcAPGMExpr(): bnb.Parser<FuncAPGMExpr> {
 export const numberAPGMExpr: bnb.Parser<NumberAPGMExpr> = _.next(
     bnb.location.chain((loc) => {
         return naturalNumberParser.map((x) =>
-            new NumberAPGMExpr(x.value, createSpan(loc, x.raw))
+            new NumberAPGMExpr(x.value, createSpan(loc, x.raw), x.raw)
         );
     }),
 ).skip(_);
 
-// TODO location
-export const stringLit: bnb.Parser<string> = _.next(bnb.text(`"`)).next(
-    bnb.match(/[^"]*/),
-).skip(
-    bnb.text(`"`),
-).skip(_).desc(["string"]);
-export const stringAPGMExpr = stringLit.map((x) => new StringAPGMExpr(x));
+export const stringLit: bnb.Parser<{ value: string, span: APGMSourceSpan }> = _.next(bnb.location).chain(loc => {
+    return bnb.text(`"`).next(bnb.match(/[^"]*/),
+    ).skip(
+        bnb.text(`"`),
+    ).skip(_).desc(["string"]).map(str => {
+        return {
+            value: str,
+            span: createSpan(loc, `"${str}"`)
+        };
+    });
+});
+
+export const stringAPGMExpr = stringLit.map((x) => new StringAPGMExpr(x.value, x.span));
 
 export function seqAPGMExprRaw(): bnb.Parser<APGMExpr[]> {
     return bnb.lazy(() => statement()).repeat();

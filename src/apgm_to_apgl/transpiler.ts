@@ -215,7 +215,7 @@ export function transpileAPGMExpr(e: APGMExpr): APGLExpr {
         return new LoopAPGLExpr(t(e.body));
     } else if (e instanceof NumberAPGMExpr) {
         throw new ErrorWithLocation(
-            `number is not allowed: ${e.value}${
+            `number is not allowed: ${e.raw ?? e.value}${
                 formatLocationAt(e.span?.start)
             }`,
             e.span?.start,
@@ -224,7 +224,11 @@ export function transpileAPGMExpr(e: APGMExpr): APGLExpr {
     } else if (e instanceof SeqAPGMExpr) {
         return new SeqAPGLExpr(e.exprs.map((x) => t(x)));
     } else if (e instanceof StringAPGMExpr) {
-        throw Error(`string is not allowed: ${e.pretty()}`);
+        throw new ErrorWithLocation(
+            `string is not allowed: ${e.pretty()}${formatLocationAt(e.span?.start)}`,
+            e.span?.start,
+            e.span
+        );
     } else if (e instanceof VarAPGMExpr) {
         throw new ErrorWithLocation(
             `macro variable is not allowed: variable "${e.name}"${

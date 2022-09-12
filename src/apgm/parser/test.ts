@@ -104,10 +104,10 @@ test("parser: func", () => {
 
 test("parser: stringLit", () => {
     const value = stringLit.tryParse(`"abc"`);
-    assertEquals(value, "abc");
+    assertEquals(value.value, "abc");
 
     const value2 = stringLit.tryParse(`  "def"`);
-    assertEquals(value2, "def");
+    assertEquals(value2.value, "def");
 });
 
 test("parser: main", () => {
