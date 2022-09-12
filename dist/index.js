@@ -27,7 +27,7 @@ const $error = $$("#error", HTMLElement);
 
 const $errorMsg = $$("#error_msg", HTMLElement);
 
-const $prefix_input = $$("#prefix_input", HTMLInputElement);
+const $prefixInput = $$("#prefix_input", HTMLInputElement);
 
 const $watchMode = $$("#watch_mode", HTMLInputElement);
 
@@ -42,7 +42,7 @@ const editor = initEditor($apgmInput);
  */
 
 /**
- * @param {{ message: string, apgmSpan?: { start: Loc, end: Loc }, apgmLocation?: Loc }} e
+ * @param {Error & { apgmSpan?: { start: Loc, end: Loc }, apgmLocation?: Loc }} e
  */
 export function showError(e) {
     try {
@@ -85,9 +85,12 @@ const compile = (withReaction = true) => {
     $output.value = "";
     resetError();
     try {
+        /**
+         * @type {{ prefix?: string }}
+         */
         const options = {};
-        if ($prefix_input.value.trim() !== "") {
-            options.prefix = $prefix_input.value.trim();
+        if ($prefixInput.value.trim() !== "") {
+            options.prefix = $prefixInput.value.trim();
         }
 
         /**
@@ -120,9 +123,7 @@ const compile = (withReaction = true) => {
             $apgmInput.style.borderColor = "#dc3545";
             $apgmInput.style.borderWidth = "2px";
         }
-        if (typeof e.apgmLocation !== "undefined") {
-            showError(e);
-        }
+        showError(e);
     }
 };
 
