@@ -2,9 +2,7 @@ import { optimizeSeq } from "./mod.ts";
 import { assertEquals, test } from "../../deps_test.ts";
 import {
     ActionAPGLExpr,
-    LoopAPGLExpr,
     SeqAPGLExpr,
-    WhileAPGLExpr,
 } from "../ast/mod.ts";
 
 test("seq optimize empty", () => {

@@ -2,6 +2,17 @@ import { bundle } from "https://deno.land/x/emit@0.9.0/mod.ts";
 
 import * as swc from "https://deno.land/x/swc@0.2.1/mod.ts";
 
+function minifyCode(code: string) {
+    const { code: minify } = swc.print(
+        swc.parse(
+            code,
+            { syntax: "ecmascript", script: false, importAssertions: true },
+        ),
+        { minify: true },
+    );
+    return minify;
+}
+
 async function bundleOrCheck(
     bundleEntryPath: string,
     outputPath: string,
@@ -11,13 +22,7 @@ async function bundleOrCheck(
 
     const { code } = result;
 
-    const { code: minify } = swc.print(
-        swc.parse(
-            code,
-            { syntax: "ecmascript", script: false, importAssertions: true },
-        ),
-        { minify: true },
-    );
+    const minify = minifyCode(code);
 
     if (check) {
         const current = await Deno.readTextFile(outputPath);

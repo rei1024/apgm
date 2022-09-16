@@ -1,12 +1,8 @@
 import { expand } from "./expander.ts";
 import {
-    APGMExpr,
     FuncAPGMExpr,
-    IfAPGMExpr,
-    LoopAPGMExpr,
     Macro,
     Main,
-    NumberAPGMExpr,
     SeqAPGMExpr,
     StringAPGMExpr,
     VarAPGMExpr,
