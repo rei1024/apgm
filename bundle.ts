@@ -22,7 +22,7 @@ async function bundleOrCheck(
     if (check) {
         const current = await Deno.readTextFile(outputPath);
         if (current.trim() !== minify.trim()) {
-            console.error("%cRun `deno task bundle`.", "color: red");
+            console.error("%cRun: deno task bundle", "color: red");
             Deno.exit(1);
         }
     } else {
