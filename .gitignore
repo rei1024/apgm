@@ -1,2 +1,6 @@
+# Editor
+.DS_Store
+.idea
+
 coverage/
 coverage.lcov
