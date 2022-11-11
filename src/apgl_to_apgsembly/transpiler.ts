@@ -60,8 +60,14 @@ export class Transpiler {
             throw Error("action must be nonempty");
         }
 
+        let addSpacePrevOutput: string = prevOutput;
+
+        if (prevOutput === "*" || prevOutput === "Z") {
+            addSpacePrevOutput = " " + prevOutput;
+        }
+
         return [
-            `${currentState}; ${prevOutput}; ${nextState}; ${
+            `${currentState}; ${addSpacePrevOutput}; ${nextState}; ${
                 actions.join(", ")
             }`,
         ];
