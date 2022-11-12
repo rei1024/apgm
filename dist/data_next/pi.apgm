@@ -1,0 +1,125 @@
+/* U6 */
+macro ALLOC_NUM!() 6
+
+/* Copy Ua to Ub with help of Utemp */
+macro copy_u!(a, b, temp) {
+    while_nz (tdec_u(a)) {
+        inc_u(b);
+        inc_u(temp);
+    }
+    while_nz (tdec_u(temp)) {
+        inc_u(a);
+    }
+}
+
+/* safe `SET Bn` */
+macro safe_set_b!(n) {
+    read_b(n);
+    set_b(n);
+}
+
+/* move head to 0 */
+macro b_head_to_0!(n) {
+    while_nz (tdec_b(n)) {}
+}
+
+/*
+copy bits from Bfrom to Bto
+    temp_u1 is U9 on MULA
+    temp_u2 is U7 on MULA
+*/
+macro copy_binary!(from, to, temp_u1, temp_u2) {
+    copy_u!(ALLOC_NUM!(), temp_u2, temp_u1);
+
+    while_nz (tdec_u(temp_u2)) {
+        if_z (read_b(from)) {
+            read_b(to);
+        } else {
+            set_b(from);
+            safe_set_b!(to);
+        }
+        inc_b(from);
+        inc_b(to);
+    }
+
+    b_head_to_0!(from);
+    b_head_to_0!(to);
+}
+
+/*
+binary2 = unary * binary1
+
+MULA
+    binary_1 is B3
+    binary_2 is B1
+    unary is U1
+    temp_u1 is U9
+    temp_u2 is U8
+    temp_u3 is U7
+*/
+macro mul_b_u!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
+    copy_u!(unary, temp_u2, temp_u1);
+
+    while_nz (tdec_u(temp_u2)) {
+        copy_u!(ALLOC_NUM!(), temp_u3, temp_u1);
+
+        while_nz (tdec_u(temp_u3)) {
+            if_nz (read_b(binary1)) {
+                set_b(binary1);
+                add_a1();
+            }
+
+            if_nz (
+                /* use value from add_b0 or add_b1 */
+                if_z (read_b(binary2)) {
+                    add_b0();
+                } else {
+                    add_b1();
+                }
+            ) {
+                set_b(binary2);
+            }
+
+            inc_b(binary1);
+            inc_b(binary2);
+        }
+
+        b_head_to_0!(binary1);
+        b_head_to_0!(binary2);
+    }
+
+}
+
+/* U5 */
+macro ITERATION_TEMP!() 5
+
+#REGISTERS {'U1':1, 'U6':6, 'B0':[0,'01'] , 'B2':[0,'1']}
+
+loop {
+    /* Iterate 4 times per digit. */
+    repeat(4, inc_u(ITERATION_TEMP!()));
+    while_nz (tdec_u(ITERATION_TEMP!())) {
+        /* Each iteration, set U0 = U0 + 1, U1 = U1 + 2. */
+        inc_u(0);
+        repeat(2, inc_u(1));
+
+        /* set B3 = B1, B1 = U1 * B1. */
+        {
+            /* Copy B1 into B3, without erasing B1. */
+            copy_binary!(1, 3, 9, 7);
+            /* Set B0 = U0 * B3 */
+            mul_b_u!(1, 3, 1, 9, 8, 7);
+        };
+        /* TODO */
+    }
+
+    /* ITER6 Z */
+    tdec_u(3);
+    /* TODO */
+}
+
+/* avoid error */
+inc_u(6);
+read_b(0);
+read_b(1);
+read_b(2);
