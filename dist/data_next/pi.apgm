@@ -1,6 +1,3 @@
-/* U6 */
-macro ALLOC_NUM!() 6
-
 /*
   Copy Ua to Ub with help of Utemp
 */
@@ -140,8 +137,15 @@ macro compare_binary!(b1, b2, result_u, temp_u1, temp_u2) {
     b_head_to_0!(b2);
 }
 
+/* U6 */
+macro ALLOC_NUM!() 6
+
 /* U5 */
 macro ITERATION_TEMP!() 5
+
+/* U4 */
+macro ITERATION_COUNT!() 4
+
 
 #REGISTERS {'U1':1, 'U6':6, 'B0':[0,'01'] , 'B2':[0,'1']}
 
@@ -168,18 +172,22 @@ loop {
             /* Set B0 = U0 * B3 */
             mul_b_u!(0, 3, 0, 9, 8, 7);
         };
+
         /* set B1 = B1 + (U1 * B0). */
         mul_b_u!(0, 1, 1, 9, 8, 7);
 
         /* set B2 = U1 * B2. */
         {
+            inc_u(ITERATION_COUNT!());
             /* Copy B2 into B3, without erasing B2. */
             copy_binary!(2, 3, 9, 7);
             /* Set B2 = U1 * B3 */
             mul_b_u!(1, 3, 1, 9, 8, 7);
         };
+
         /* ITER8 */
-        add_u!(4, 6, 7);
+        /* Increase the amount of memory */
+        add_u!(ITERATION_COUNT!(), ALLOC_NUM!(), 7);
     }
 
     /* ITER6 Z */
@@ -189,8 +197,3 @@ loop {
     copy_binary!(1, 3, 9, 7);
     /* TODO */
 }
-
-/* avoid error */
-read_b(0);
-read_b(1);
-read_b(2);
