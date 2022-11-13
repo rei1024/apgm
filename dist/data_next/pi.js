@@ -14,18 +14,20 @@ let b1 = 0n;
 let b2 = 1n;
 let b3 = 0n;
 
-for (let i = 0; i < 2; i++) {
+let res = "";
+
+for (let i = 0; i < 100; i++) {
     for (let j = 0; j < 4; j++) {
-        console.log({
-            j,
-            u0,
-            u1,
-            u4,
-            b0,
-            b1,
-            b2,
-            b3,
-        });
+        // console.log({
+        //     j,
+        //     u0,
+        //     u1,
+        //     u4,
+        //     b0,
+        //     b1,
+        //     b2,
+        //     b3,
+        // });
         u0 += 1n;
         u1 += 2n;
 
@@ -48,26 +50,32 @@ for (let i = 0; i < 2; i++) {
 
     u8 = u3;
 
-    while (true) {
-        while (true) {
-            if (b2 <= b3) {
-                b3 = b3 - b2;
-                u2++;
-            } else {
-                break;
-            }
-        }
+    b3 = b1;
 
-        if (u8 === 0n) {
-            break;
+    while (true) {
+        // console.log(b2, b3)
+        if (b2 <= b3) {
+            b3 = b3 - b2;
+            u2++;
         } else {
-            u8--;
-            u2 = 0n;
-            b3 *= 10n;
+            if (u8 === 0n) {
+                break;
+            } else {
+                u8--;
+                u2 = 0n;
+                b3 *= 10n;
+            }
         }
     }
 
-    console.log(`--- ${u2} ---`);
+    res += `${u2}`;
     u2 = 0n;
+
+    if (u3 === 0n) {
+        res += ".";
+    }
+
     u3++;
 }
+
+console.log(res);

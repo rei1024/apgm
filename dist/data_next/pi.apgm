@@ -69,8 +69,8 @@ macro sub_b!(b1, b2, temp_u1, temp_u2) {
             if_z (read_b(b2)) {
                 sub_b0();
             } else {
-                sub_b1();
                 set_b(2);
+                sub_b1();
             }
         ) {
             set_b(b1);
@@ -229,6 +229,7 @@ macro b_mul_10!(binary, temp_u1, temp_u2) {
         ) {
             set_b(binary);
         }
+        inc_b(binary);
     }
 
     b_head_to_0!(binary);
