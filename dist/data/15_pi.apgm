@@ -133,6 +133,16 @@ macro mul_b_u_pred!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
 }
 
 /**
+ * temp_binary = binary
+ * binary = binary * unary
+ */
+macro mul_b_u_self!(binary, temp_binary, unary, temp_u1, temp_u2, temp_u3) {
+    copy_binary!(binary, temp_binary, temp_u1, temp_u3);
+    /* Set B1 = U1 * B3 */
+    mul_b_u_pred!(temp_binary, binary, unary, temp_u1, temp_u2, temp_u3);
+}
+
+/**
  * binary2 = binary2 + unary * binary1
  */
 macro mul_b_u!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
@@ -256,33 +266,19 @@ loop {
         repeat(2, inc_u(1));
 
         /* set B3 = B1, B1 = U1 * B1. */
-        {
-            /* Copy B1 into B3, without erasing B1. */
-            copy_binary!(1, 3, 9, 7);
-            /* Set B1 = U1 * B3 */
-            mul_b_u_pred!(3, 1, 1, 9, 8, 7);
-        };
+        mul_b_u_self!(1, 3, 1, 9, 8, 7);
 
         /* set B3 = B0, B0 = U0 * B0. */
-        {
-            /* Copy B0 into B3, without erasing B0. */
-            copy_binary!(0, 3, 9, 7);
-            /* Set B0 = U0 * B3 */
-            mul_b_u_pred!(3, 0, 0, 9, 8, 7);
-        };
+        mul_b_u_self!(0, 3, 0, 9, 8, 7);
 
         /* set B1 = B1 + (U1 * B0). */
         /* B1 + (U1 * B3) */
         mul_b_u!(3, 1, 1, 9, 8, 7);
 
+        inc_u(ITERATION_COUNT!());
+
         /* set B2 = U1 * B2. */
-        {
-            inc_u(ITERATION_COUNT!());
-            /* Copy B2 into B3, without erasing B2. */
-            copy_binary!(2, 3, 9, 7);
-            /* Set B2 = U1 * B3 */
-            mul_b_u_pred!(3, 2, 1, 9, 8, 7);
-        };
+        mul_b_u_self!(2, 3, 1, 9, 8, 7);
 
         /* ITER8 */
         /* Increase the amount of memory */
