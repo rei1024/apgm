@@ -1,0 +1,52 @@
+// deno run dist/data_next/pi.js
+
+let u0 = 0n;
+let u1 = 1n;
+// const u6 = 6n;
+let u4 = 0;
+let b0 = 2n;
+let b1 = 0n;
+let b2 = 1n;
+let b3 = 0n;
+
+for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 4; j++) {
+        console.log({
+            j,
+            u0,
+            u1,
+            u4,
+            b0,
+            b1,
+            b2,
+            b3,
+        });
+        u0 += 1n;
+        u1 += 2n;
+
+        // A
+        b3 = b1;
+        b1 = b1 + (u1 - 1n) * b3;
+
+        // B
+        b3 = b0;
+        b0 = b0 + (u0 - 1n) * b3;
+
+        // C
+        b1 = b1 + (u1 * b3);
+
+        // D
+        u4++;
+        b3 = b2;
+        b2 = b2 + (u1 - 1n) * b3;
+    }
+
+    while (true) {
+        if (b2 <= b3) {
+            b3 = b3 - b2;
+            u2++;
+        } else {
+            break;
+        }
+    }
+}
