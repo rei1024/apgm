@@ -60,7 +60,7 @@ macro copy_binary!(from, to, temp_u1, temp_u2) {
 }
 
 /**
- *b1 = b1 - b2
+ * b1 = b1 - b2
  */
 macro sub_b!(b1, b2, temp_u1, temp_u2) {
     copy_u!(ALLOC_NUM!(), temp_u2, temp_u1);
@@ -134,11 +134,11 @@ macro mul_b_u_pred!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
 
 /**
  * temp_binary = binary
- * binary = binary * unary
+ * binary = unary * binary
  */
 macro mul_b_u_self!(binary, temp_binary, unary, temp_u1, temp_u2, temp_u3) {
     copy_binary!(binary, temp_binary, temp_u1, temp_u3);
-    /* Set B1 = U1 * B3 */
+    /* binary = binary + (unary - 1) * binary = unary * binary */
     mul_b_u_pred!(temp_binary, binary, unary, temp_u1, temp_u2, temp_u3);
 }
 
@@ -257,6 +257,7 @@ macro DECIMAL_COUNT!() 3
 
 #REGISTERS {'U1':1, 'U6':6, 'B0':[0,'01'] , 'B2':[0,'1']}
 
+/* Start */
 loop {
     /* Iterate 4 times per digit. */
     repeat(4, inc_u(ITERATION_TEMP!()));
