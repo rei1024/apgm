@@ -1,3 +1,7 @@
+/*
+    # π Calculator
+*/
+
 /**
  * Copy Ua to Ub with help of Utemp
  */
@@ -129,7 +133,7 @@ macro mul_b_u_pred!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
 }
 
 /**
- *binary2 = binary2 + unary * binary1
+ * binary2 = binary2 + unary * binary1
  */
 macro mul_b_u!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
     copy_u!(unary, temp_u2, temp_u1);
