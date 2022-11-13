@@ -27,15 +27,16 @@ macro b_head_to_0!(n) {
     while_nz (tdec_b(n)) {}
 }
 
+/* Reset Un to 0 */
 macro u_to_0!(n) {
     while_nz (tdec_u(n)) {}
 }
 
-/*
-copy bits from Bfrom to Bto
-    temp_u1 is U9 on MULA
-    temp_u2 is U7 on MULA
-*/
+/**
+ * copy bits from Bfrom to Bto
+ *  temp_u1 is U9 on MULA
+ *  temp_u2 is U7 on MULA
+ */
 macro copy_binary!(from, to, temp_u1, temp_u2) {
     copy_u!(ALLOC_NUM!(), temp_u2, temp_u1);
 
@@ -54,9 +55,9 @@ macro copy_binary!(from, to, temp_u1, temp_u2) {
     b_head_to_0!(to);
 }
 
-/*
-    b1 = b1 - b2
-*/
+/**
+ *b1 = b1 - b2
+ */
 macro sub_b!(b1, b2, temp_u1, temp_u2) {
     copy_u!(ALLOC_NUM!(), temp_u2, temp_u1);
 
@@ -86,10 +87,10 @@ macro sub_b!(b1, b2, temp_u1, temp_u2) {
 /*
     binary2 = binary2 + binary1
 */
-macro add_b!(binary1, binary2, temp_u3, temp_u1) {
-    copy_u!(ALLOC_NUM!(), temp_u3, temp_u1);
+macro add_b!(binary1, binary2, temp_u1, temp_u2) {
+    copy_u!(ALLOC_NUM!(), temp_u1, temp_u2);
 
-    while_nz (tdec_u(temp_u3)) {
+    while_nz (tdec_u(temp_u1)) {
         if_nz (read_b(binary1)) {
             set_b(binary1);
             add_a1();
@@ -114,17 +115,9 @@ macro add_b!(binary1, binary2, temp_u3, temp_u1) {
     b_head_to_0!(binary2);
 }
 
-/*
-binary2 = binary2 + (unary - 1) * binary1
-
-MULA
-    binary1 is B3
-    binary2 is B1
-    unary is U1
-    temp_u1 is U9
-    temp_u2 is U8
-    temp_u3 is U7
-*/
+/**
+ * binary2 = binary2 + (unary - 1) * binary1
+ */
 macro mul_b_u_pred!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
     copy_u!(unary, temp_u2, temp_u1);
 
@@ -135,9 +128,9 @@ macro mul_b_u_pred!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
     }
 }
 
-/*
-    binary2 = binary2 + unary * binary1
-*/
+/**
+ *binary2 = binary2 + unary * binary1
+ */
 macro mul_b_u!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
     copy_u!(unary, temp_u2, temp_u1);
 
@@ -146,10 +139,10 @@ macro mul_b_u!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
     }
 }
 
-/*
-   b1 > b2 --> result_u = 1
-   b1 <= b2 --> result_u = 0
-*/
+/**
+ * b1 > b2 --> result_u = 1
+ * b1 <= b2 --> result_u = 0
+ */
 macro compare_binary!(b1, b2, result_u, temp_u1, temp_u2) {
     copy_u!(ALLOC_NUM!(), temp_u1, temp_u2);
 
@@ -303,12 +296,12 @@ loop {
         /* Now compare B2 with B3 to see which is bigger */
         compare_binary!(2, 3, 10, 9, 7);
         if_z (tdec_u(10)) {
-            /* B2 <= B3 */
+            /* Case: B2 <= B3 */
             /* B3 = B3 - B2 */
             sub_b!(3, 2, 9, 7);
             inc_u(2);
         } else {
-            /* B2 > B3 */
+            /* Case: B2 > B3 */
             if_z (tdec_u(8)) {
                 break();
             } else {
