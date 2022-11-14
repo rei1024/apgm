@@ -288,7 +288,8 @@ loop {
         add_u!(ITERATION_COUNT!(), ALLOC_NUM!(), 7);
     }
 
-    /* ITER6 Z */
+    /* Extract the units digit from (10^U3) * B1 / B2 */
+
     /* Copy U3 to temporary register U8. */
     copy_u!(DECIMAL_COUNT!(), 8, 7);
 
