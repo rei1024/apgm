@@ -2,6 +2,7 @@ import {
     ActionAPGLExpr,
     APGLExpr,
     BreakAPGLExpr,
+    extractSingleActionExpr,
     IfAPGLExpr,
     isEmptyExpr,
     LoopAPGLExpr,
@@ -32,7 +33,33 @@ export class Context {
     ) {}
 }
 
-type Line = string;
+export class Line {
+    constructor(
+        private inner: {
+            currentState: string;
+            prevOutput: "Z" | "NZ" | "*" | "ZZ";
+            nextState: string;
+            actions: string[];
+        },
+    ) {
+        if (this.inner.actions.length === 0) {
+            throw Error("action must be nonempty");
+        }
+    }
+
+    toLineString(): string {
+        const prevOutput = this.inner.prevOutput;
+        let addSpacePrevOutput: string = prevOutput;
+
+        if (prevOutput === "*" || prevOutput === "Z") {
+            addSpacePrevOutput = " " + prevOutput;
+        }
+
+        return `${this.inner.currentState}; ${addSpacePrevOutput}; ${this.inner.nextState}; ${
+            this.inner.actions.join(", ")
+        }`;
+    }
+}
 
 export class Transpiler {
     private id = 0;
@@ -49,35 +76,21 @@ export class Transpiler {
     }
 
     emitLine(
-        { currentState, prevOutput, nextState, actions }: {
+        inner: {
             currentState: string;
             prevOutput: "Z" | "NZ" | "*" | "ZZ";
             nextState: string;
             actions: string[];
         },
-    ): Line[] {
-        if (actions.length === 0) {
-            throw Error("action must be nonempty");
-        }
-
-        let addSpacePrevOutput: string = prevOutput;
-
-        if (prevOutput === "*" || prevOutput === "Z") {
-            addSpacePrevOutput = " " + prevOutput;
-        }
-
-        return [
-            `${currentState}; ${addSpacePrevOutput}; ${nextState}; ${
-                actions.join(", ")
-            }`,
-        ];
+    ): Line {
+        return new Line(inner);
     }
 
     emitTransition(
         current: string,
         next: string,
         inputZNZ: "*" | "Z" | "NZ" | "ZZ" = "*",
-    ): Line[] {
+    ): Line {
         return this.emitLine({
             currentState: current,
             prevOutput: inputZNZ,
@@ -86,7 +99,7 @@ export class Transpiler {
         });
     }
 
-    transpile(expr: APGLExpr): Line[] {
+    transpile(expr: APGLExpr): string[] {
         const initialState = "INITIAL";
         const secondState = this.getFreshName() + "_INITIAL";
         const initial = this.emitTransition(initialState, secondState, "ZZ");
@@ -105,12 +118,12 @@ export class Transpiler {
             actions: ["HALT_OUT"],
         });
 
-        return [...initial, ...body, ...end];
+        return [initial, ...body, end].map((line) => line.toLineString());
     }
 
     transpileExpr(ctx: Context, expr: APGLExpr): Line[] {
         if (expr instanceof ActionAPGLExpr) {
-            return this.transpileActionAPGLExpr(ctx, expr);
+            return [this.transpileActionAPGLExpr(ctx, expr)];
         } else if (expr instanceof SeqAPGLExpr) {
             return this.transpileSeqAPGLExpr(ctx, expr);
         } else if (expr instanceof IfAPGLExpr) {
@@ -129,7 +142,7 @@ export class Transpiler {
     transpileActionAPGLExpr(
         ctx: Context,
         actionExpr: ActionAPGLExpr,
-    ): Line[] {
+    ): Line {
         return this.emitLine({
             currentState: ctx.input,
             prevOutput: ctx.inputZNZ,
@@ -141,7 +154,7 @@ export class Transpiler {
     transpileSeqAPGLExpr(ctx: Context, seqExpr: SeqAPGLExpr): Line[] {
         // length === 0
         if (isEmptyExpr(seqExpr)) {
-            return this.emitTransition(ctx.input, ctx.output, ctx.inputZNZ);
+            return [this.emitTransition(ctx.input, ctx.output, ctx.inputZNZ)];
         }
 
         if (seqExpr.exprs.length === 1) {
@@ -157,6 +170,7 @@ export class Transpiler {
 
         let seq: Line[] = [];
         let state = ctx.input;
+        const lastIndex = seqExpr.exprs.length - 1;
         for (const [i, expr] of seqExpr.exprs.entries()) {
             if (i === 0) {
                 const outputState = this.getFreshName();
@@ -165,7 +179,7 @@ export class Transpiler {
                     expr,
                 ));
                 state = outputState;
-            } else if (i === seqExpr.exprs.length - 1) {
+            } else if (i === lastIndex) {
                 // 最後はoutput
                 seq = seq.concat(this.transpileExpr(
                     new Context(state, ctx.output, "*"),
@@ -215,7 +229,7 @@ export class Transpiler {
             : this.getFreshName();
         const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
             ? []
-            : this.emitTransition(ctx.input, loopState, ctx.inputZNZ);
+            : [this.emitTransition(ctx.input, loopState, ctx.inputZNZ)];
 
         this.loopFinalStates.push(ctx.output);
 
@@ -230,11 +244,11 @@ export class Transpiler {
     }
 
     /**
-     * 中身が空のwhileについて最適化
+     * 条件が1行かつ中身が空
      */
-    transpileWhileAPGLExprBodyEmpty(
+    transpileWhileAPGLExprBodyEmptyAndSimpleCond(
         ctx: Context,
-        cond: APGLExpr,
+        cond: ActionAPGLExpr,
         modifier: "Z" | "NZ",
     ): Line[] {
         const condStartState = ctx.inputZNZ === "*"
@@ -242,7 +256,54 @@ export class Transpiler {
             : this.getFreshName();
         const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
             ? []
-            : this.emitTransition(ctx.input, condStartState, ctx.inputZNZ);
+            : [this.emitTransition(ctx.input, condStartState, ctx.inputZNZ)];
+
+        const condEndState = this.getFreshName();
+        const condRes = this.transpileActionAPGLExpr(
+            new Context(condStartState, condEndState, "*"),
+            cond,
+        );
+
+        const zRes = this.emitLine({
+            currentState: condEndState,
+            prevOutput: "Z",
+            nextState: modifier === "Z" ? condEndState : ctx.output,
+            actions: modifier === "Z" ? cond.actions : ["NOP"],
+        });
+
+        const nzRes = this.emitLine({
+            currentState: condEndState,
+            prevOutput: "NZ",
+            nextState: modifier === "Z" ? ctx.output : condEndState,
+            actions: modifier === "Z" ? ["NOP"] : cond.actions,
+        });
+
+        return [...fromZOrNZ, condRes, zRes, nzRes];
+    }
+
+    /**
+     * 中身が空のwhileについて最適化
+     */
+    transpileWhileAPGLExprBodyEmpty(
+        ctx: Context,
+        cond: APGLExpr,
+        modifier: "Z" | "NZ",
+    ): Line[] {
+        const singleAction = extractSingleActionExpr(cond);
+        if (singleAction !== undefined) {
+            return this.transpileWhileAPGLExprBodyEmptyAndSimpleCond(
+                ctx,
+                singleAction,
+                modifier,
+            );
+        }
+
+        const condStartState = ctx.inputZNZ === "*"
+            ? ctx.input
+            : this.getFreshName();
+        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
+            ? []
+            : [this.emitTransition(ctx.input, condStartState, ctx.inputZNZ)];
 
         const condEndState = this.getFreshName();
         const condRes = this.transpileExpr(
@@ -264,8 +325,7 @@ export class Transpiler {
             actions: ["NOP"],
         });
 
-        // zResとnzResは1行
-        return [...fromZOrNZ, ...condRes, ...zRes, ...nzRes];
+        return [...fromZOrNZ, ...condRes, zRes, nzRes];
     }
 
     transpileWhileAPGLExpr(ctx: Context, whileExpr: WhileAPGLExpr): Line[] {
@@ -277,21 +337,18 @@ export class Transpiler {
             );
         }
 
-        let cond: Line[] = [];
         const condStartState = ctx.inputZNZ === "*"
             ? ctx.input
             : this.getFreshName();
-        if (ctx.inputZNZ !== "*") {
-            cond = cond.concat(
-                this.emitTransition(ctx.input, condStartState, ctx.inputZNZ),
-            );
-        }
+        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
+            ? []
+            : [this.emitTransition(ctx.input, condStartState, ctx.inputZNZ)];
 
         const condEndState = this.getFreshName();
-        cond = cond.concat(this.transpileExpr(
+        const cond = this.transpileExpr(
             new Context(condStartState, condEndState, "*"),
             whileExpr.cond,
-        ));
+        );
 
         const bodyStartState = this.getFreshName() + "_WHILE_BODY";
 
@@ -318,8 +375,7 @@ export class Transpiler {
 
         this.loopFinalStates.pop();
 
-        // zResとnzResは1行
-        return [...cond, ...zRes, ...nzRes, ...body];
+        return [...fromZOrNZ, ...cond, zRes, nzRes, ...body];
     }
 
     transpileBreakAPGLExpr(ctx: Context, breakExpr: BreakAPGLExpr): Line[] {
@@ -349,13 +405,13 @@ export class Transpiler {
             }
         }
 
-        return this.emitTransition(ctx.input, finalState, ctx.inputZNZ);
+        return [this.emitTransition(ctx.input, finalState, ctx.inputZNZ)];
     }
 }
 
 export function transpileAPGL(
     expr: APGLExpr,
     options: TranspilerOptions = {},
-): Line[] {
+): string[] {
     return new Transpiler(options).transpile(expr);
 }
