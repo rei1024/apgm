@@ -153,6 +153,64 @@ test("integration 12", () => {
     assertEquals(output, "0");
 });
 
+test("integration 12.5", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    while_nz ({ tdec_u(0); tdec_u(0); }) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "0");
+});
+
+test("integration 12.6", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    while_z ({ tdec_u(0); tdec_u(0); }) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "1");
+});
+
+test("integration 12.7", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    if_nz (tdec_u(1)) {
+        output(".");
+    }
+    while_nz ({ tdec_u(0); tdec_u(0); }) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "0");
+});
+
+test("integration 12.8", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    if_nz (tdec_u(1)) {
+        output(".");
+    }
+    while_z ({ tdec_u(0); tdec_u(0); }) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "1");
+});
+
 test("integration 13", () => {
     const output = runAPGM(`
     #REGISTERS { "U0": 42 }
