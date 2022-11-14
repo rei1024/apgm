@@ -408,10 +408,8 @@ test("transpileAPGL if while empty", () => {
         "STATE_4; NZ; STATE_END; NOP",
         "STATE_END;  *; STATE_END; HALT_OUT",
     ]);
-});
 
-test("transpileAPGL if while empty in seq", () => {
-    const expr = new IfAPGLExpr(
+    const expr2 = new IfAPGLExpr(
         new ActionAPGLExpr(["TDEC U1"]),
         new WhileAPGLExpr(
             "Z",
@@ -423,16 +421,7 @@ test("transpileAPGL if while empty in seq", () => {
         new SeqAPGLExpr([]),
     );
 
-    assertEquals(transpileAPGL(expr), [
-        "INITIAL; ZZ; STATE_1_INITIAL; NOP",
-        "STATE_1_INITIAL;  *; STATE_2; TDEC U1",
-        "STATE_2;  Z; STATE_3; NOP",
-        "STATE_2; NZ; STATE_END; NOP",
-        "STATE_3;  *; STATE_4; TDEC U0",
-        "STATE_4;  Z; STATE_4; TDEC U0",
-        "STATE_4; NZ; STATE_END; NOP",
-        "STATE_END;  *; STATE_END; HALT_OUT",
-    ]);
+    assertEquals(transpileAPGL(expr), transpileAPGL(expr2));
 });
 
 test("transpileAPGL while", () => {
