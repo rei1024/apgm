@@ -138,3 +138,52 @@ print_digit_u!(1);
 `);
     assertEquals(output, "42");
 });
+
+test("integration 12", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    while_nz (tdec_u(0)) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "0");
+});
+
+test("integration 13", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    if_z (tdec_u(1)) {
+        output("2");
+    } else {
+        output("3");
+    }
+    while_nz (tdec_u(0)) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "20");
+});
+
+test("integration 14", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 42 }
+    if_nz (tdec_u(1)) {
+        output("2");
+    } else {
+        output("3");
+    }
+    while_nz (tdec_u(0)) {}
+    if_z (tdec_u(0)) {
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "30");
+});
