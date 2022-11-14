@@ -1,5 +1,6 @@
 import { assertEquals, runAPGsembly, test } from "../deps_test.ts";
 import { integration } from "./mod.ts";
+import { pi } from "./test_data.ts";
 
 function runAPGMMachine(src: string) {
     return runAPGsembly(integration(src).join("\n"));
@@ -186,4 +187,37 @@ test("integration 14", () => {
     }
 `);
     assertEquals(output, "30");
+});
+
+test("integration 14.5", () => {
+    const output = runAPGM(`
+    while_nz (output("3")) {}
+`);
+    assertEquals(output, "3");
+});
+
+test("integration 15", () => {
+    const output = runAPGM(`
+    #REGISTERS { "U0": 2 }
+    while_z (tdec_u(0)) {}
+    if_z (tdec_u(0)) {
+        inc_u(0);
+        output("0");
+    } else {
+        output("1");
+    }
+
+    if_z (tdec_u(0)) {
+        inc_u(0);
+        output("0");
+    } else {
+        output("1");
+    }
+`);
+    assertEquals(output, "10");
+});
+
+test("integration 16", () => {
+    const output = runAPGM(pi);
+    assertEquals(output, "3.14");
 });
