@@ -136,6 +136,7 @@ macro add_1_or_2_to_binary!(binary, binary_length_u, constant, temp_u1, temp_u2)
         b_head_to_0!(binary);
     });
 
+    /* correct binary_length_u */
     copy_u!(binary_length_u, temp_u1, temp_u2);
     while_nz (tdec_u(temp_u1)) {
         inc_b(binary);
@@ -158,12 +159,14 @@ macro add_2_to_binary!(binary, binary_length_u, temp_u1, temp_u2) {
 }
 
 /*
-    output_binary = binary1 * small_binary
+    output_binary = output_binary + binary1 * small_binary
 */
 macro mul_b_b!(
     binary1, small_binary, small_binary_length, output_binary,
     temp_u1, temp_u2, temp_u3, temp_u4) {
     copy_u!(small_binary_length, temp_u1, temp_u2);
+
+    inc_u(temp_u1);
 
     while_nz (tdec_u(temp_u1)) {
         while_nz (tdec_u(temp_u4)) {
@@ -175,13 +178,22 @@ macro mul_b_b!(
         while_nz (tdec_u(temp_u2)) {
             inc_u(temp_u4);
         }
+
         inc_u(temp_u4);
 
         if_nz (read_b(small_binary)) {
+            set_b(small_binary);
             add_b!(binary1, output_binary, temp_u2, temp_u3);
         }
+
         inc_b(small_binary);
+        b_head_to_0!(output_binary);
     }
+
+    u_to_0!(temp_u1);
+    u_to_0!(temp_u2);
+    u_to_0!(temp_u3);
+    u_to_0!(temp_u4);
 
     b_head_to_0!(small_binary);
     b_head_to_0!(output_binary);
@@ -196,40 +208,6 @@ macro binary_zero!(binary, temp_u1, temp_u2) {
     }
 
     b_head_to_0!(binary);
-}
-
-/**
- * binary2 = binary2 + (unary - 1) * binary1
- */
-macro mul_b_u_pred!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
-    copy_u!(unary, temp_u2, temp_u1);
-
-    tdec_u(temp_u2);
-
-    while_nz (tdec_u(temp_u2)) {
-        add_b!(binary1, binary2, temp_u3, temp_u1);
-    }
-}
-
-/**
- * temp_binary = binary
- * binary = unary * binary
- */
-macro mul_b_u_self!(binary, temp_binary, unary, temp_u1, temp_u2, temp_u3) {
-    copy_binary!(binary, temp_binary, temp_u1, temp_u3);
-    /* binary = binary + (unary - 1) * binary = unary * binary */
-    mul_b_u_pred!(temp_binary, binary, unary, temp_u1, temp_u2, temp_u3);
-}
-
-/**
- * binary2 = binary2 + unary * binary1
- */
-macro mul_b_u!(binary1, binary2, unary, temp_u1, temp_u2, temp_u3) {
-    copy_u!(unary, temp_u2, temp_u1);
-
-    while_nz (tdec_u(temp_u2)) {
-        add_b!(binary1, binary2, temp_u3, temp_u1);
-    }
 }
 
 /**
@@ -335,11 +313,98 @@ macro ITERATION_COUNT!() 4
 /* U3 */
 macro DECIMAL_COUNT!() 3
 
+/*
+    #REGISTERS { 'U6': 20, 'B0':[0,'110011'], 'B1':[0,'110011'], 'U1': 5 }
+    add_b!(0, 2, 10, 11);
 
-#REGISTERS { 'U6': 10, 'B0':[0,'110011'] }
+    inc_b(2);
 
-add_b!(0, 2, 10, 11);
+    add_b!(0, 2, 10, 11);
+*/
 
-inc_b(2);
+/*
+    #REGISTERS { 'U6': 20, 'B0':[0,'110011'], 'B1':[0,'110011'], 'U1': 6 }
+    mul_b_b!(0, 1, 1, 2, 10, 11, 12, 13);
+*/
 
-add_b!(0, 2, 10, 11);
+/*
+    U0 -> B4, U11
+    U1 -> B5, U12
+*/
+
+#REGISTERS { 'U6':6, 'B0':[0,'01'] , 'B2':[0,'1'], 'B5': [0, '1'], 'U12': 0 }
+
+/* Start */
+loop {
+    /* Iterate 4 times per digit. */
+    repeat(4, inc_u(ITERATION_TEMP!()));
+    while_nz (tdec_u(ITERATION_TEMP!())) {
+        /* Each iteration, set U0 = U0 + 1, U1 = U1 + 2. */
+        add_1_to_binary!(4, 11, 9, 8);
+        add_2_to_binary!(5, 12, 9, 8);
+
+        /* set B3 = B1, B1 = U1 * B1. */
+        copy_binary!(1, 3, 9, 8);
+        binary_zero!(1, 9, 8);
+        mul_b_b!(3, 5, 12, 1, 9, 8, 7, 13);
+
+        /* set B3 = B0, B0 = U0 * B0. */
+        copy_binary!(0, 3, 9, 8);
+        binary_zero!(0, 9, 8);
+        mul_b_b!(3, 4, 11, 0, 9, 8, 7, 13);
+
+        /* set B1 = B1 + (U1 * B0). */
+        /* B1 + (U1 * B3) */
+        mul_b_b!(3, 5, 12, 1, 9, 8, 7, 13);
+        /* mul_b_u!(3, 1, 1, 9, 8, 7); */
+
+        /* set B2 = U1 * B2. */
+        copy_binary!(2, 3, 9, 8);
+        binary_zero!(2, 9, 8);
+        mul_b_b!(3, 5, 12, 2, 9, 8, 7, 13);
+        /* mul_b_u_self!(2, 3, 1, 9, 8, 7); */
+
+        inc_u(ITERATION_COUNT!());
+
+        /* ITER8 */
+        /* Increase the amount of memory */
+        add_u!(ITERATION_COUNT!(), ALLOC_NUM!(), 7);
+    }
+
+    /* ITER6 Z */
+    /* Copy U3 to temporary register U8. */
+    copy_u!(DECIMAL_COUNT!(), 8, 7);
+
+    /* Copy B1 into B3, without erasing B1. */
+    copy_binary!(1, 3, 9, 7);
+
+    loop {
+        /* Now compare B2 with B3 to see which is bigger */
+        compare_binary!(2, 3, 10, 9, 7);
+        if_z (tdec_u(10)) {
+            /* Case: B2 <= B3 */
+            /* B3 = B3 - B2 */
+            sub_b!(3, 2, 9, 7);
+            inc_u(2);
+        } else {
+            /* Case: B2 > B3 */
+            if_z (tdec_u(8)) {
+                break();
+            } else {
+                /* Multiply B3 by 10 and reset U2 */
+                u_to_0!(2);
+                b_mul_10!(3, 9, 7);
+            }
+        }
+    }
+
+    print_digit_u!(2);
+
+    if_z (tdec_u(DECIMAL_COUNT!())) {
+        inc_u(DECIMAL_COUNT!());
+        output(".");
+    } else {
+        inc_u(DECIMAL_COUNT!());
+        inc_u(DECIMAL_COUNT!());
+    }
+}
