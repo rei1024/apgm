@@ -1,5 +1,5 @@
 /*
-    # π Calculator
+    # Faster π Calculator
 */
 
 /**
@@ -121,8 +121,8 @@ macro add_b!(binary1, binary2, temp_u1, temp_u2) {
     b_head_to_0!(binary2);
 }
 
-macro add_1_or_2_to_binary!(binary, binary_length_u, constant, temp_u1, temp_u2) {
-    /* 3 is forbidden */
+/* constant must be 1 or 2 */
+macro add_1_or_2_to_binary!(binary, binary_max_pointer, constant, temp_u1, temp_u2) {
     repeat(constant, {
         loop {
             if_z (read_b(binary)) {
@@ -136,8 +136,8 @@ macro add_1_or_2_to_binary!(binary, binary_length_u, constant, temp_u1, temp_u2)
         b_head_to_0!(binary);
     });
 
-    /* correct binary_length_u */
-    copy_u!(binary_length_u, temp_u1, temp_u2);
+    /* correct binary_max_pointer */
+    copy_u!(binary_max_pointer, temp_u1, temp_u2);
     while_nz (tdec_u(temp_u1)) {
         inc_b(binary);
     }
@@ -145,26 +145,26 @@ macro add_1_or_2_to_binary!(binary, binary_length_u, constant, temp_u1, temp_u2)
     inc_b(binary);
     if_nz (read_b(binary)) {
         set_b(binary);
-        inc_u(binary_length_u);
+        inc_u(binary_max_pointer);
     }
     b_head_to_0!(binary);
 }
 
-macro add_1_to_binary!(binary, binary_length_u, temp_u1, temp_u2) {
-    add_1_or_2_to_binary!(binary, binary_length_u, 1, temp_u1, temp_u2);
+macro add_1_to_binary!(binary, binary_max_pointer, temp_u1, temp_u2) {
+    add_1_or_2_to_binary!(binary, binary_max_pointer, 1, temp_u1, temp_u2);
 }
 
-macro add_2_to_binary!(binary, binary_length_u, temp_u1, temp_u2) {
-    add_1_or_2_to_binary!(binary, binary_length_u, 2, temp_u1, temp_u2);
+macro add_2_to_binary!(binary, binary_max_pointer, temp_u1, temp_u2) {
+    add_1_or_2_to_binary!(binary, binary_max_pointer, 2, temp_u1, temp_u2);
 }
 
 /*
-    output_binary = output_binary + binary1 * small_binary
+    output_binary = output_binary + binary * small_binary
 */
 macro mul_b_b!(
-    binary1, small_binary, small_binary_length, output_binary,
+    binary, small_binary, small_binary_max_pointer, output_binary,
     temp_u1, temp_u2, temp_u3, temp_u4) {
-    copy_u!(small_binary_length, temp_u1, temp_u2);
+    copy_u!(small_binary_max_pointer, temp_u1, temp_u2);
 
     inc_u(temp_u1);
 
@@ -183,7 +183,7 @@ macro mul_b_b!(
 
         if_nz (read_b(small_binary)) {
             set_b(small_binary);
-            add_b!(binary1, output_binary, temp_u2, temp_u3);
+            add_b!(binary, output_binary, temp_u2, temp_u3);
         }
 
         inc_b(small_binary);
@@ -199,6 +199,7 @@ macro mul_b_b!(
     b_head_to_0!(output_binary);
 }
 
+/* Set all bits to 0 */
 macro binary_zero!(binary, temp_u1, temp_u2) {
     copy_u!(ALLOC_NUM!(), temp_u1, temp_u2);
 
