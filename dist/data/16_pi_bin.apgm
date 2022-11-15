@@ -190,9 +190,6 @@ macro mul_b_b!(
         b_head_to_0!(output_binary);
     }
 
-    u_to_0!(temp_u1);
-    u_to_0!(temp_u2);
-    u_to_0!(temp_u3);
     u_to_0!(temp_u4);
 
     b_head_to_0!(small_binary);
