@@ -66,6 +66,14 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+    <script>
+        const DARK_MODE_KEY = 'dark_mode';
+        try {
+            if (localStorage.getItem(DARK_MODE_KEY) === 'on') {
+                document.body.setAttribute('apge_dark', 'on');
+            }
+        } catch (_) {}
+    </script>
     <header class="mt-1 text-center">
         <h1 class="font-x-large">APGM - APGsembly macro language</h1>
     </header>

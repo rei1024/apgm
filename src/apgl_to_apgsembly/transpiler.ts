@@ -35,11 +35,11 @@ export class Context {
 
 export class Line {
     constructor(
-        private inner: {
-            currentState: string;
-            prevOutput: "Z" | "NZ" | "*" | "ZZ";
-            nextState: string;
-            actions: string[];
+        private readonly inner: {
+            readonly currentState: string;
+            readonly prevOutput: "Z" | "NZ" | "*" | "ZZ";
+            readonly nextState: string;
+            readonly actions: string[];
         },
     ) {
         if (this.inner.actions.length === 0) {
@@ -49,13 +49,13 @@ export class Line {
 
     toLineString(): string {
         const prevOutput = this.inner.prevOutput;
-        let addSpacePrevOutput: string = prevOutput;
+        let prevOutputWithSpace: string = prevOutput;
 
         if (prevOutput === "*" || prevOutput === "Z") {
-            addSpacePrevOutput = " " + prevOutput;
+            prevOutputWithSpace = " " + prevOutput;
         }
 
-        return `${this.inner.currentState}; ${addSpacePrevOutput}; ${this.inner.nextState}; ${
+        return `${this.inner.currentState}; ${prevOutputWithSpace}; ${this.inner.nextState}; ${
             this.inner.actions.join(", ")
         }`;
     }
@@ -63,7 +63,7 @@ export class Line {
 
 export class Transpiler {
     private id = 0;
-    private loopFinalStates: string[] = [];
+    private readonly loopFinalStates: string[] = [];
     private readonly prefix: string;
 
     constructor(options: TranspilerOptions = {}) {
@@ -75,23 +75,12 @@ export class Transpiler {
         return `${this.prefix}${this.id}`;
     }
 
-    emitLine(
-        inner: {
-            currentState: string;
-            prevOutput: "Z" | "NZ" | "*" | "ZZ";
-            nextState: string;
-            actions: string[];
-        },
-    ): Line {
-        return new Line(inner);
-    }
-
     emitTransition(
         current: string,
         next: string,
         inputZNZ: "*" | "Z" | "NZ" | "ZZ" = "*",
     ): Line {
-        return this.emitLine({
+        return new Line({
             currentState: current,
             prevOutput: inputZNZ,
             nextState: next,
@@ -111,7 +100,7 @@ export class Transpiler {
             expr,
         );
 
-        const end = this.emitLine({
+        const end = new Line({
             currentState: endState,
             prevOutput: "*",
             nextState: endState,
@@ -143,7 +132,7 @@ export class Transpiler {
         ctx: Context,
         actionExpr: ActionAPGLExpr,
     ): Line {
-        return this.emitLine({
+        return new Line({
             currentState: ctx.input,
             prevOutput: ctx.inputZNZ,
             nextState: ctx.output,
@@ -162,10 +151,7 @@ export class Transpiler {
             if (expr === undefined) {
                 throw new Error("internal error");
             }
-            return this.transpileExpr(
-                ctx,
-                expr,
-            );
+            return this.transpileExpr(ctx, expr);
         }
 
         let seq: Line[] = [];
@@ -257,14 +243,14 @@ export class Transpiler {
             cond,
         );
 
-        const zRes = this.emitLine({
+        const zRes = new Line({
             currentState: condEndState,
             prevOutput: "Z",
             nextState: modifier === "Z" ? condEndState : ctx.output,
             actions: modifier === "Z" ? cond.actions : ["NOP"],
         });
 
-        const nzRes = this.emitLine({
+        const nzRes = new Line({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: modifier === "Z" ? ctx.output : condEndState,
@@ -300,14 +286,14 @@ export class Transpiler {
             cond,
         );
 
-        const zRes = this.emitLine({
+        const zRes = new Line({
             currentState: condEndState,
             prevOutput: "Z",
             nextState: modifier === "Z" ? condStartState : ctx.output,
             actions: ["NOP"],
         });
 
-        const nzRes = this.emitLine({
+        const nzRes = new Line({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: modifier === "Z" ? ctx.output : condStartState,
@@ -337,14 +323,14 @@ export class Transpiler {
 
         const bodyStartState = this.getFreshName() + "_WHILE_BODY";
 
-        const zRes = this.emitLine({
+        const zRes = new Line({
             currentState: condEndState,
             prevOutput: "Z",
             nextState: whileExpr.modifier === "Z" ? bodyStartState : ctx.output,
             actions: ["NOP"],
         });
 
-        const nzRes = this.emitLine({
+        const nzRes = new Line({
             currentState: condEndState,
             prevOutput: "NZ",
             nextState: whileExpr.modifier === "Z" ? ctx.output : bodyStartState,
