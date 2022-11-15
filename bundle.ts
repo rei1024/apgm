@@ -25,6 +25,7 @@ async function bundleOrCheck(
     if (check) {
         const current = await Deno.readTextFile(outputPath);
         if (current.trim() !== minify.trim()) {
+            console.error("%cBundle check is failed", "color: red");
             console.error("%cRun: deno task bundle", "color: red");
             Deno.exit(1);
         }

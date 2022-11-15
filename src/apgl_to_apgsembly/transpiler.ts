@@ -224,12 +224,9 @@ export class Transpiler {
     }
 
     transpileLoopAPGLExpr(ctx: Context, loopExpr: LoopAPGLExpr): Line[] {
-        const loopState = ctx.inputZNZ === "*"
-            ? ctx.input
-            : this.getFreshName();
-        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
-            ? []
-            : [this.emitTransition(ctx.input, loopState, ctx.inputZNZ)];
+        const { startState: loopState, fromZOrNZ } = this.normalizeInputState(
+            ctx,
+        );
 
         this.loopFinalStates.push(ctx.output);
 
@@ -251,12 +248,8 @@ export class Transpiler {
         cond: ActionAPGLExpr,
         modifier: "Z" | "NZ",
     ): Line[] {
-        const condStartState = ctx.inputZNZ === "*"
-            ? ctx.input
-            : this.getFreshName();
-        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
-            ? []
-            : [this.emitTransition(ctx.input, condStartState, ctx.inputZNZ)];
+        const { startState: condStartState, fromZOrNZ } = this
+            .normalizeInputState(ctx);
 
         const condEndState = this.getFreshName();
         const condRes = this.transpileActionAPGLExpr(
@@ -298,12 +291,8 @@ export class Transpiler {
             );
         }
 
-        const condStartState = ctx.inputZNZ === "*"
-            ? ctx.input
-            : this.getFreshName();
-        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
-            ? []
-            : [this.emitTransition(ctx.input, condStartState, ctx.inputZNZ)];
+        const { startState: condStartState, fromZOrNZ } = this
+            .normalizeInputState(ctx);
 
         const condEndState = this.getFreshName();
         const condRes = this.transpileExpr(
@@ -337,12 +326,8 @@ export class Transpiler {
             );
         }
 
-        const condStartState = ctx.inputZNZ === "*"
-            ? ctx.input
-            : this.getFreshName();
-        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
-            ? []
-            : [this.emitTransition(ctx.input, condStartState, ctx.inputZNZ)];
+        const { startState: condStartState, fromZOrNZ } = this
+            .normalizeInputState(ctx);
 
         const condEndState = this.getFreshName();
         const cond = this.transpileExpr(
@@ -376,6 +361,19 @@ export class Transpiler {
         this.loopFinalStates.pop();
 
         return [...fromZOrNZ, ...cond, zRes, nzRes, ...body];
+    }
+
+    private normalizeInputState(
+        ctx: Context,
+    ): { startState: string; fromZOrNZ: Line[] } {
+        const startState = ctx.inputZNZ === "*"
+            ? ctx.input
+            : this.getFreshName();
+        const fromZOrNZ: Line[] = ctx.inputZNZ === "*"
+            ? []
+            : [this.emitTransition(ctx.input, startState, ctx.inputZNZ)];
+
+        return { startState, fromZOrNZ };
     }
 
     transpileBreakAPGLExpr(ctx: Context, breakExpr: BreakAPGLExpr): Line[] {
