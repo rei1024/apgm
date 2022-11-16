@@ -63,7 +63,7 @@ export class Line {
 
 export class Transpiler {
     private id = 0;
-    private readonly loopFinalStates: string[] = [];
+    readonly #loopFinalStates: string[] = [];
     private readonly prefix: string;
 
     constructor(options: TranspilerOptions = {}) {
@@ -210,18 +210,18 @@ export class Transpiler {
     }
 
     transpileLoopAPGLExpr(ctx: Context, loopExpr: LoopAPGLExpr): Line[] {
-        const { startState: loopState, fromZOrNZ } = this.normalizeInputState(
+        const { startState: loopState, fromZOrNZ } = this.#normalizeInputState(
             ctx,
         );
 
-        this.loopFinalStates.push(ctx.output);
+        this.#loopFinalStates.push(ctx.output);
 
         const body = this.transpileExpr(
             new Context(loopState, loopState, "*"),
             loopExpr.body,
         );
 
-        this.loopFinalStates.pop();
+        this.#loopFinalStates.pop();
 
         return [...fromZOrNZ, ...body];
     }
@@ -235,7 +235,7 @@ export class Transpiler {
         modifier: "Z" | "NZ",
     ): Line[] {
         const { startState: condStartState, fromZOrNZ } = this
-            .normalizeInputState(ctx);
+            .#normalizeInputState(ctx);
 
         const condEndState = this.getFreshName();
         const condRes = this.transpileActionAPGLExpr(
@@ -278,7 +278,7 @@ export class Transpiler {
         }
 
         const { startState: condStartState, fromZOrNZ } = this
-            .normalizeInputState(ctx);
+            .#normalizeInputState(ctx);
 
         const condEndState = this.getFreshName();
         const condRes = this.transpileExpr(
@@ -313,7 +313,7 @@ export class Transpiler {
         }
 
         const { startState: condStartState, fromZOrNZ } = this
-            .normalizeInputState(ctx);
+            .#normalizeInputState(ctx);
 
         const condEndState = this.getFreshName();
         const cond = this.transpileExpr(
@@ -337,19 +337,19 @@ export class Transpiler {
             actions: ["NOP"],
         });
 
-        this.loopFinalStates.push(ctx.output);
+        this.#loopFinalStates.push(ctx.output);
 
         const body = this.transpileExpr(
             new Context(bodyStartState, condStartState, "*"),
             whileExpr.body,
         );
 
-        this.loopFinalStates.pop();
+        this.#loopFinalStates.pop();
 
         return [...fromZOrNZ, ...cond, zRes, nzRes, ...body];
     }
 
-    private normalizeInputState(
+    #normalizeInputState(
         ctx: Context,
     ): { startState: string; fromZOrNZ: Line[] } {
         const startState = ctx.inputZNZ === "*"
@@ -373,7 +373,7 @@ export class Transpiler {
         }
 
         const finalState =
-            this.loopFinalStates[this.loopFinalStates.length - level];
+            this.#loopFinalStates[this.#loopFinalStates.length - level];
 
         if (finalState === undefined) {
             if (level === 1) {

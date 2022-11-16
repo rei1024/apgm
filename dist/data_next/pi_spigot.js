@@ -6,7 +6,7 @@
 /**
  * @param {bigint} a
  * @param {bigint} b
- * @returns
+ * @returns {bigint}
  */
 function div(a, b) {
     return a / b;
@@ -16,7 +16,10 @@ function div(a, b) {
 // >   g(q,r,t,k,n,l) = if 4*q+r-t<n*t
 // >     then n : g(10*q,10*(r-n*t),t,k,div(10*(3*q+r))t-10*n,l)
 // >     else g(q*k,(2*q+r)*l,t*l,k+1,div(q*(7*k+2)+r*l)(t*l),l+2)
-export function* spigot() {
+/**
+ * @returns {Generator<bigint, void, unknown>}
+ */
+export function* piSpigot() {
     // can be negative
     let q = 1n;
     let r = 0n;
@@ -50,7 +53,7 @@ export function* spigot() {
 }
 
 let i = 0;
-for (const x of spigot()) {
+for (const x of piSpigot()) {
     console.log(x);
     i++;
     if (i >= 10) {

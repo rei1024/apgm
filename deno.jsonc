@@ -19,7 +19,7 @@
         }
     },
     "tasks": {
-        "pre-commit-hook": "deno task fmt --check && deno task t && deno run --allow-read --allow-write --allow-env --allow-net bundle.ts check",
+        "pre-commit-hook": "deno task fmt --check && deno task t",
         // test
         "t": "deno test --parallel",
         // test with watcher
@@ -31,7 +31,7 @@
         // local server
         "up": "deno run --allow-net --allow-read https://deno.land/std@0.164.0/http/file_server.ts . -p 1618",
         // bundle
-        "bundle": "deno run --allow-read --allow-write --allow-env --allow-net bundle.ts",
+        "bundle": "deno run --allow-net=deno.land,registry.npmjs.org --allow-env --allow-read --allow-write --allow-run bundle.ts",
         // coverage
         "cov": "rm ./coverage -r && rm ./coverage.lcov && deno test --coverage=coverage && deno coverage coverage --lcov --output=coverage.lcov && genhtml -o coverage/html coverage.lcov && open coverage/html/index.html"
     }
