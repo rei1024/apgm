@@ -19,6 +19,7 @@ import {
 import { expand } from "../apgm/macro/expander.ts";
 import { optimize } from "../apgl/action_optimizer/mod.ts";
 import { optimizeSeq } from "../apgl/seq_optimizer/mod.ts";
+import { APGLExpr } from "../apgl/ast/core.ts";
 
 function logged<T, S>(
     f: (_: T) => S,
@@ -33,14 +34,14 @@ function logged<T, S>(
     return y;
 }
 
-export function integration(
-    str: string,
-    options: TranspilerOptions = {},
-    log = false,
-): string[] {
-    const apgm = logged(parseMain, str, log ? "apgm" : undefined);
-    const expanded = logged(expand, apgm, log ? "apgm expaned" : undefined);
-    const apgl = logged(transpileAPGMExpr, expanded, log ? "apgl" : undefined);
+function optimizeAPGL(
+    apgl: APGLExpr,
+    { log, noOptimize }: { log: boolean; noOptimize: boolean | undefined },
+): APGLExpr {
+    if (noOptimize === true) {
+        return apgl;
+    }
+
     const seqOptimizedAPGL = logged(
         optimizeSeq,
         apgl,
@@ -51,6 +52,22 @@ export function integration(
         seqOptimizedAPGL,
         log ? "optimized apgl action" : undefined,
     );
+
+    return optimizedAPGL;
+}
+
+export function integration(
+    str: string,
+    options: TranspilerOptions = {},
+    log = false,
+): string[] {
+    const apgm = logged(parseMain, str, log ? "apgm" : undefined);
+    const expanded = logged(expand, apgm, log ? "apgm expaned" : undefined);
+    const apgl = logged(transpileAPGMExpr, expanded, log ? "apgl" : undefined);
+    const optimizedAPGL = optimizeAPGL(apgl, {
+        log,
+        noOptimize: options.noOptimize,
+    });
     const apgs = transpileAPGL(optimizedAPGL, options);
 
     const comment = [

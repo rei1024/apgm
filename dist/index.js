@@ -29,6 +29,8 @@ const $prefixInput = $$("#prefix_input", HTMLInputElement);
 
 const $watchMode = $$("#watch_mode", HTMLInputElement);
 
+const $disableOptimization = $$("#disable_optimization", HTMLInputElement);
+
 const $apgmInput = $$("#apgm_input", HTMLElement);
 
 const $configButton = $$("#config_button", HTMLButtonElement);
@@ -78,12 +80,14 @@ const compile = (withReaction = true) => {
     resetError();
     try {
         /**
-         * @type {{ prefix?: string }}
+         * @type {{ prefix?: string, noOptimize?: boolean }}
          */
         const options = {};
         if ($prefixInput.value.trim() !== "") {
             options.prefix = $prefixInput.value.trim();
         }
+
+        options.noOptimize = $disableOptimization.checked;
 
         /**
          * @type {string}
