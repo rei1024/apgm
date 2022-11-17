@@ -17,11 +17,9 @@ export function mergeActionAPGLExpr(
     b: ActionAPGLExpr,
 ): ActionAPGLExpr | undefined {
     const mergedActions = merge(toActions(a), toActions(b));
-    if (mergedActions === undefined) {
-        return undefined;
-    } else {
-        return new ActionAPGLExpr(mergedActions.map((a) => a.pretty()));
-    }
+    return mergedActions === undefined
+        ? undefined
+        : new ActionAPGLExpr(mergedActions.map((action) => action.pretty()));
 }
 
 function merge(
