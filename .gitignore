@@ -4,5 +4,3 @@
 
 coverage/
 coverage.lcov
-
-deno.lock
