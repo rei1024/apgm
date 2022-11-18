@@ -75,7 +75,16 @@ const resetError = () => {
     $compile.style.backgroundColor = "";
 };
 
+/** @type {string | undefined} */
+let prevInput = undefined;
+
 const compile = (withReaction = true) => {
+    const input = editor.getValue();
+    // skip compile
+    if (prevInput === input) {
+        return;
+    }
+
     $output.value = "";
     resetError();
     try {
@@ -92,7 +101,7 @@ const compile = (withReaction = true) => {
         /**
          * @type {string}
          */
-        const result = integration(editor.getValue(), options).join("\n");
+        const result = integration(input, options).join("\n");
         $output.value = result;
         $download.disabled = false;
         $copy.disabled = false;
@@ -100,6 +109,7 @@ const compile = (withReaction = true) => {
             $compile.style.backgroundColor = "var(--bs-success)";
         }
         $output.style.borderColor = "var(--bs-success)";
+        prevInput = input;
         setTimeout(() => {
             $output.style.borderColor = "";
             if (withReaction) {
