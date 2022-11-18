@@ -52,6 +52,15 @@ h1 {
     }
 }
 
+/**** speedy animation ****/
+.fade {
+    transition: opacity .1s linear; /* 0.15s */
+}
+
+.modal.fade .modal-dialog {
+    transition: transform .2s ease-out; /* 0.3s */
+}
+
 /**** Dark mode ****/
 :root {
     --dark-mode-color: #dddddd;
