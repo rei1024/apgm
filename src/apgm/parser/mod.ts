@@ -46,7 +46,7 @@ function createSpan(start: bnb.SourceLocation, word: string): APGMSourceSpan {
         },
     };
 }
-export const identifier: bnb.Parser<string> = _.next(identifierOnly).skip(_);
+export const identifier: bnb.Parser<string> = identifierOnly.wrap(_, _);
 export const identifierWithSpan: bnb.Parser<[string, APGMSourceSpan]> = _.chain(
     () => {
         return bnb.location.chain((loc) => {
@@ -60,19 +60,19 @@ export const identifierWithSpan: bnb.Parser<[string, APGMSourceSpan]> = _.chain(
 // completion_parser.tsと合わせる
 const macroIdentifierRegExp = /[a-zA-Z_][a-zA-Z_0-9]*!/u;
 
-export const macroIdentifier: bnb.Parser<string> = _.next(
-    bnb.match(macroIdentifierRegExp),
-).skip(_).desc(["macro name"]);
+export const macroIdentifier: bnb.Parser<string> = bnb.match(
+    macroIdentifierRegExp,
+).wrap(_, _).desc(["macro name"]);
 
 export function token(s: string): bnb.Parser<string> {
-    return _.next(bnb.text(s)).skip(_);
+    return bnb.text(s).wrap(_, _);
 }
 
 export function tokenWithSpan(s: string): bnb.Parser<[string, APGMSourceSpan]> {
     const x: bnb.Parser<[string, APGMSourceSpan]> = bnb.location.chain((loc) =>
         bnb.text(s).map((t) => [t, createSpan(loc, s)])
     );
-    return _.next(x).skip(_);
+    return x.wrap(_, _);
 }
 
 /** `.` */
@@ -93,6 +93,9 @@ export const varAPGMExpr: bnb.Parser<VarAPGMExpr> = identifierWithSpan.map((
     [ident, span],
 ) => new VarAPGMExpr(ident, span));
 
+/**
+ * (expr0, expr1, ..., exprN)
+ */
 function argExprs<T>(arg: () => bnb.Parser<T>): bnb.Parser<T[]> {
     return bnb.lazy(() => arg()).sepBy(comma).wrap(
         leftParen,
@@ -116,13 +119,13 @@ export function funcAPGMExpr(): bnb.Parser<FuncAPGMExpr> {
     });
 }
 
-export const numberAPGMExpr: bnb.Parser<NumberAPGMExpr> = _.next(
-    bnb.location.chain((loc) => {
+export const numberAPGMExpr: bnb.Parser<NumberAPGMExpr> = bnb.location.chain(
+    (loc) => {
         return naturalNumberParser.map((x) =>
             new NumberAPGMExpr(x.value, createSpan(loc, x.raw), x.raw)
         );
-    }),
-).skip(_);
+    },
+).wrap(_, _);
 
 export const stringLit: bnb.Parser<{ value: string; span: APGMSourceSpan }> = _
     .next(bnb.location).chain((loc) => {
@@ -199,10 +202,11 @@ export function ifAPGMExpr(): bnb.Parser<IfAPGMExpr> {
 export function macroHead(): bnb.Parser<
     { span: APGMSourceSpan; name: string; args: VarAPGMExpr[] }
 > {
+    const MACRO = "macro";
     const macroKeyword: bnb.Parser<APGMSourceSpan> = _.chain((_) => {
         return bnb.location.chain((location) => {
-            return bnb.text("macro").next(someSpaces).map((_) =>
-                createSpan(location, "macro")
+            return bnb.text(MACRO).next(someSpaces).map((_) =>
+                createSpan(location, MACRO)
             );
         });
     });
@@ -241,12 +245,12 @@ export const header = bnb.text("#").next(bnb.match(/REGISTERS|COMPONENTS/))
         anythingLine.map((c) => new Header(x, c))
     );
 
-export const headers: bnb.Parser<Header[]> = _.next(header).skip(_).repeat();
+export const headers: bnb.Parser<Header[]> = header.wrap(_, _).repeat();
 
 export function main(): bnb.Parser<Main> {
     return macro().repeat().chain((macros) => {
         return headers.chain((h) => {
-            return _.next(seqAPGMExprRaw()).skip(_).map((x) => {
+            return seqAPGMExprRaw().wrap(_, _).map((x) => {
                 return new Main(macros, h, new SeqAPGMExpr(x));
             });
         });
