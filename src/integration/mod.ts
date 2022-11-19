@@ -1,4 +1,4 @@
-import { parseMain } from "../apgm/parser/mod.ts";
+import { createErrorLines, parseMain } from "../apgm/parser/mod.ts";
 import {
     emptyArgFuncs,
     numArgFuncs,
@@ -20,6 +20,7 @@ import { expand } from "../apgm/macro/expander.ts";
 import { optimize } from "../apgl/action_optimizer/mod.ts";
 import { optimizeSeq } from "../apgl/seq_optimizer/mod.ts";
 import { APGLExpr } from "../apgl/ast/core.ts";
+import { ErrorWithSpan } from "../apgm/ast/core.ts";
 
 function logged<T, S>(
     f: (_: T) => S,
@@ -62,18 +63,36 @@ export function integration(
     log = false,
 ): string[] {
     const apgm = logged(parseMain, str, log ? "apgm" : undefined);
-    const expanded = logged(expand, apgm, log ? "apgm expaned" : undefined);
-    const apgl = logged(transpileAPGMExpr, expanded, log ? "apgl" : undefined);
-    const optimizedAPGL = optimizeAPGL(apgl, {
-        log,
-        noOptimize: options.noOptimize,
-    });
-    const apgs = transpileAPGL(optimizedAPGL, options);
 
-    const comment = [
-        "# State    Input    Next state    Actions",
-        "# ---------------------------------------",
-    ];
-    const head = apgm.headers.map((x) => x.toString());
-    return head.concat(comment, apgs);
+    try {
+        const expanded = logged(expand, apgm, log ? "apgm expaned" : undefined);
+        const apgl = logged(
+            transpileAPGMExpr,
+            expanded,
+            log ? "apgl" : undefined,
+        );
+        const optimizedAPGL = optimizeAPGL(apgl, {
+            log,
+            noOptimize: options.noOptimize,
+        });
+        const apgs = transpileAPGL(optimizedAPGL, options);
+
+        const comment = [
+            "# State    Input    Next state    Actions",
+            "# ---------------------------------------",
+        ];
+        const head = apgm.headers.map((x) => x.toString());
+        return head.concat(comment, apgs);
+    } catch (error) {
+        if (error instanceof ErrorWithSpan && error.apgmSpan) {
+            throw new ErrorWithSpan(
+                [error.message, ...createErrorLines(error.apgmSpan.start, str)]
+                    .join("\n"),
+                error.apgmSpan,
+                { cause: error.cause },
+            );
+        }
+
+        throw error;
+    }
 }
