@@ -68,6 +68,13 @@ export function token(s: string): bnb.Parser<string> {
     return _.next(bnb.text(s)).skip(_);
 }
 
+export function tokenWithSpan(s: string): bnb.Parser<[string, APGMSourceSpan]> {
+    const x: bnb.Parser<[string, APGMSourceSpan]> = bnb.location.chain((loc) =>
+        bnb.text(s).map((t) => [t, createSpan(loc, s)])
+    );
+    return _.next(x).skip(_);
+}
+
 /** `.` */
 export const comma = token(",").desc(["`,`"]);
 /** `(` */
@@ -168,9 +175,10 @@ export function loopAPGMExpr(): bnb.Parser<LoopAPGMExpr> {
     );
 }
 
-export const ifKeyword = bnb.choice(token("if_z"), token("if_nz")).map((x) =>
-    x === "if_z" ? "Z" : "NZ"
-);
+export const ifKeyword: bnb.Parser<["Z" | "NZ", APGMSourceSpan]> = bnb.choice(
+    tokenWithSpan("if_z"),
+    tokenWithSpan("if_nz"),
+).map((x) => x[0] === "if_z" ? ["Z", x[1]] : ["NZ", x[1]]);
 
 export function ifAPGMExpr(): bnb.Parser<IfAPGMExpr> {
     return ifKeyword.chain((mod) => {
@@ -180,7 +188,7 @@ export function ifAPGMExpr(): bnb.Parser<IfAPGMExpr> {
                     token("else").next(bnb.lazy(() => apgmExpr())),
                     bnb.ok(undefined),
                 ).map((elseBody) => {
-                    return new IfAPGMExpr(mod, cond, body, elseBody);
+                    return new IfAPGMExpr(mod[0], cond, body, elseBody, mod[1]);
                 });
             });
         });

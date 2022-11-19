@@ -84,6 +84,7 @@ const compile = (withReaction = true) => {
     if (prevInput === input) {
         return;
     }
+    prevInput = input;
 
     $output.value = "";
     resetError();
@@ -109,7 +110,6 @@ const compile = (withReaction = true) => {
             $compile.style.backgroundColor = "var(--bs-success)";
         }
         $output.style.borderColor = "var(--bs-success)";
-        prevInput = input;
         setTimeout(() => {
             $output.style.borderColor = "";
             if (withReaction) {
