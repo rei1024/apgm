@@ -90,7 +90,7 @@ const compile = (withReaction = true) => {
     resetError();
     try {
         /**
-         * @type {{ prefix?: string, noOptimize?: boolean }}
+         * @type {import('../src/integration/mod').IntegrationOptions}
          */
         const options = {};
         if ($prefixInput.value.trim() !== "") {
