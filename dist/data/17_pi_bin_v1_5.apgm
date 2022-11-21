@@ -1,5 +1,5 @@
 /*
-    # Faster π Calculator v2
+    # Faster π Calculator v1.5
 */
 
 /**
@@ -401,8 +401,7 @@ loop {
 
         /* ITER8 */
         /* Increase the amount of memory */
-        add_u!(U1_MAX!(), ALLOC_NUM!(), 7);
-        inc_u(ALLOC_NUM!());
+        add_u!(ITERATION_COUNT!(), ALLOC_NUM!(), 7);
     }
 
     /* Extract the units digit from (10^U3) * B1 / B2 */
