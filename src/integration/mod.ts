@@ -57,13 +57,13 @@ function optimizeAPGL(
     return optimizedAPGL;
 }
 
-export type IntegrationOptions = TranspilerOptions;
+export type IntegrationOptions = TranspilerOptions & { log?: boolean };
 
 export function integration(
     str: string,
     options: IntegrationOptions = {},
-    log = false,
 ): string[] {
+    const log = options.log ?? false;
     const apgm = logged(parseMain, str, log ? "apgm" : undefined);
 
     try {

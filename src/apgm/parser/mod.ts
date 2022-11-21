@@ -1,7 +1,7 @@
 import { bnb } from "../../deps.ts";
 
 import { naturalNumberParser } from "./lib/number.ts";
-import { createErrorLines, parsePretty } from "./parsePretty.ts";
+import { createErrorLines, parsePretty } from "./lib/parsePretty.ts";
 export { createErrorLines };
 
 import {
