@@ -414,7 +414,7 @@ loop {
 
     /* Get position of MSB of B3 to U13 */
     get_msb!(3, 13, 14);
-    repeat(4, inc_u(13)); /* play safe */
+    repeat(8, inc_u(13)); /* play safe */
 
     loop {
         /* Now compare B2 with B3 to see which is bigger */
@@ -431,7 +431,6 @@ loop {
             } else {
                 /* Multiply B3 by 10 and reset U2 */
                 u_to_0!(2);
-                repeat(4, inc_u(13)); /* 2^4 > 10 */
                 b_mul_10!(3, 9, 7, 13);
             }
         }
