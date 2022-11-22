@@ -75,17 +75,8 @@ const resetError = () => {
     $compile.style.backgroundColor = "";
 };
 
-/** @type {string | undefined} */
-let prevInput = undefined;
-
 const compile = (withReaction = true) => {
     const input = editor.getValue();
-    // skip compile
-    if (prevInput === input) {
-        return;
-    }
-    prevInput = input;
-
     $output.value = "";
     resetError();
     try {
