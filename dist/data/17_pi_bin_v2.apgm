@@ -377,8 +377,14 @@ macro U1_MAX!() 12
 
 /* Start */
 loop {
-    /* Iterate 4 times per digit. */
-    repeat(4, inc_u(ITERATION_TEMP!()));
+    /* Iterate 3.5 times per digit. */
+    if_z (tdec_u(15)) {
+        repeat(4, inc_u(ITERATION_TEMP!()));
+        inc_u(15);
+    } else {
+        repeat(3, inc_u(ITERATION_TEMP!()));
+    }
+
     while_nz (tdec_u(ITERATION_TEMP!())) {
         /* Each iteration, set U0 = U0 + 1, U1 = U1 + 2. */
         add_1_to_binary!(U0_BITS!(), U0_MAX!(), 9, 8);
