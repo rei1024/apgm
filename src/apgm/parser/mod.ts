@@ -23,7 +23,9 @@ import { createSpan } from "./lib/create_span.ts";
 import { stringLit } from "./lib/string.ts";
 
 // https://stackoverflow.com/questions/16160190/regular-expression-to-find-c-style-block-comments#:~:text=35-,Try%20using,-%5C/%5C*(%5C*(%3F!%5C/)%7C%5B%5E*%5D)*%5C*%5C/
-export const comment = bnb.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc([] /* 無し */);
+export const comment = bnb.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc(
+    [], /* 無し */
+);
 
 /** 空白 */
 export const _: bnb.Parser<undefined> = bnb.match(/\s*/).desc(["space"]).sepBy(
