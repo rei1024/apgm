@@ -12,6 +12,7 @@ import {
 import { assertEquals, assertThrows, test } from "../../deps_test.ts";
 import { VarAPGMExpr } from "../ast/var.ts";
 import { stringLit } from "./lib/string.ts";
+import { pi } from "../../integration/test_data.ts";
 
 test("parser: identifier", () => {
     const value = identifier.tryParse("abc");
@@ -217,6 +218,17 @@ test("parser: main", () => {
         }
         #REGISTERS { "U0": 5 }
         inc_u(0);`,
+        `
+        loop {
+            break();
+        }
+        `,
+        `
+        loop {
+            break(2);
+        }
+        `,
+        pi,
     ];
     for (const c of testCases) {
         const m = main().tryParse(c);
