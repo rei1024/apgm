@@ -130,7 +130,7 @@ test("parser: main", () => {
             }
         `);
     });
-    ifAPGMExpr().tryParse(`
+    ifAPGMExpr.tryParse(`
         if_z(f(2)) {
             g(3);
         }

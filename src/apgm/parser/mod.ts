@@ -162,8 +162,8 @@ export const ifKeyword: bnb.Parser<["Z" | "NZ", APGMSourceSpan]> = bnb.choice(
     tokenWithSpan("if_nz"),
 ).map((x) => x[0] === "if_z" ? ["Z", x[1]] : ["NZ", x[1]]);
 
-export function ifAPGMExpr(): bnb.Parser<IfAPGMExpr> {
-    return ifKeyword.chain(([mod, span]) => {
+export const ifAPGMExpr: bnb.Parser<IfAPGMExpr> = ifKeyword.chain(
+    ([mod, span]) => {
         return exprWithParen.chain((cond) => {
             return bnb.lazy(() => apgmExpr()).chain((body) => {
                 return bnb.choice(
@@ -174,22 +174,22 @@ export function ifAPGMExpr(): bnb.Parser<IfAPGMExpr> {
                 });
             });
         });
+    },
+);
+
+const MACRO = "macro";
+const macroKeyword: bnb.Parser<APGMSourceSpan> = _.chain((_) => {
+    return bnb.location.chain((location) => {
+        return bnb.text(MACRO).next(someSpaces).map((_) =>
+            createSpan(location, MACRO)
+        );
     });
-}
+});
 
 /** macro f!(a, b) */
 export function macroHead(): bnb.Parser<
     { span: APGMSourceSpan; name: string; args: VarAPGMExpr[] }
 > {
-    const MACRO = "macro";
-    const macroKeyword: bnb.Parser<APGMSourceSpan> = _.chain((_) => {
-        return bnb.location.chain((location) => {
-            return bnb.text(MACRO).next(someSpaces).map((_) =>
-                createSpan(location, MACRO)
-            );
-        });
-    });
-
     return macroKeyword.and(macroIdentifier).chain(([span, ident]) => {
         return argExprs(() => varAPGMExpr).map(
             (args) => {
@@ -231,7 +231,7 @@ export function apgmExpr(): bnb.Parser<APGMExpr> {
     return bnb.choice(
         loopAPGMExpr,
         whileAPGMExpr,
-        bnb.lazy(() => ifAPGMExpr()),
+        ifAPGMExpr,
         bnb.lazy(() => funcAPGMExpr()),
         seqAPGMExpr,
         varAPGMExpr,
@@ -250,7 +250,7 @@ export function statement(): bnb.Parser<APGMExpr> {
     return bnb.choice(
         loopAPGMExpr,
         whileAPGMExpr,
-        ifAPGMExpr(),
+        ifAPGMExpr,
         apgmExpr().skip(semicolon),
     );
 }
