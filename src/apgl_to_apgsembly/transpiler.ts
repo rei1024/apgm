@@ -169,13 +169,7 @@ export class Transpiler {
         let state = ctx.input;
         const lastIndex = seqExpr.exprs.length - 1;
         for (const [i, expr] of seqExpr.exprs.entries()) {
-            if (i === lastIndex) {
-                // 最後はoutput
-                seq = seq.concat(this.#transpileExpr(
-                    new Context(state, ctx.output, "*"),
-                    expr,
-                ));
-            } else {
+            if (i !== lastIndex) {
                 const outputState = this.#getFreshName();
                 seq = seq.concat(this.#transpileExpr(
                     new Context(
@@ -186,6 +180,12 @@ export class Transpiler {
                     expr,
                 ));
                 state = outputState;
+            } else {
+                // 最後はoutput
+                seq = seq.concat(this.#transpileExpr(
+                    new Context(state, ctx.output, "*"),
+                    expr,
+                ));
             }
         }
 
