@@ -1,7 +1,7 @@
 export {
     assertEquals,
     assertThrows,
-} from "https://deno.land/std@0.200.0/assert/mod.ts";
+} from "https://deno.land/std@0.201.0/assert/mod.ts";
 
 export { runAPGsembly } from "./deps.ts";
 
