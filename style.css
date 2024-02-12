@@ -31,7 +31,7 @@ main {
 
 #apgm_input {
     width: 55%;
-    height: calc(100vh - 170px);
+    height: calc(100vh - 120px);
     resize: both;
 }
 

@@ -23,10 +23,6 @@ const $copy = $$("#copy", HTMLButtonElement);
 
 const $download = $$("#download", HTMLButtonElement);
 
-const $error = $$("#error", HTMLElement);
-
-const $errorMsg = $$("#error_msg", HTMLElement);
-
 const $prefixInput = $$("#prefix_input", HTMLInputElement);
 
 const $watchMode = $$("#watch_mode", HTMLInputElement);
@@ -67,7 +63,7 @@ export function showError(e) {
 
 const resetError = () => {
     editor.setMarker(undefined);
-    $error.classList.add("d-none");
+    $output.classList.remove("is-invalid");
     $apgmInput.style.borderColor = "";
     $output.style.borderColor = "";
     $compile.style.backgroundColor = "";
@@ -110,8 +106,8 @@ const compile = (withReaction = true) => {
             e = new Error("unknown error");
         }
 
-        $errorMsg.textContent = e.message;
-        $error.classList.remove("d-none");
+        $output.value = e.message;
+        $output.classList.add("is-invalid");
         $download.disabled = true;
         $copy.disabled = true;
         if (withReaction) {
