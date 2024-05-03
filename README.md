@@ -23,7 +23,7 @@ graph TD
 
 ### Requirements
 
-- `deno` above 1.41.3
+- `deno` above 1.43.1
   - <https://docs.deno.com/runtime/manual>
 
 ### Usage
