@@ -25,7 +25,7 @@ import { A } from "../apgl/actions.ts";
 function transpileEmptyArgFunc(funcExpr: FuncAPGMExpr, expr: APGLExpr) {
     if (funcExpr.args.length !== 0) {
         throw new ErrorWithSpan(
-            `"${funcExpr.name}" expects empty argments${
+            `"${funcExpr.name}" expects empty arguments${
                 formatLocationAt(funcExpr.span?.start)
             }`,
             funcExpr.span,
