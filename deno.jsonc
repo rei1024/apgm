@@ -14,7 +14,7 @@
         // bundle
         "bundle": "deno run --allow-net=deno.land,registry.npmjs.org --allow-env --allow-read --allow-write --allow-run bundle.ts",
         // coverage
-        "cov": "rm ./coverage -r && rm ./coverage.lcov && deno test --coverage=coverage && deno coverage coverage --lcov --output=coverage.lcov && genhtml -o coverage/html coverage.lcov && open coverage/html/index.html",
+        "cov": "(rm ./coverage -r || true) && (rm ./coverage.lcov || true) && deno test --coverage=coverage && deno coverage coverage --lcov --output=coverage.lcov && genhtml --ignore-errors range -o coverage/html coverage.lcov && open coverage/html/index.html",
         "spell": "npx cspell ."
     },
     "compilerOptions": {
