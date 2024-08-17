@@ -12,7 +12,7 @@
         // local server
         "up": "deno run --allow-net --allow-read --allow-sys jsr:@std/http@^0.224.5/file-server . -p 1618",
         // bundle
-        "bundle": "deno run --allow-net=deno.land,registry.npmjs.org --allow-env --allow-read --allow-write --allow-run bundle.ts",
+        "bundle": "deno run --allow-env --allow-read --allow-write --allow-run bundle.ts",
         // coverage
         "cov": "(rm ./coverage -r || true) && (rm ./coverage.lcov || true) && deno test --coverage=coverage && deno coverage coverage --lcov --output=coverage.lcov && genhtml --ignore-errors range -o coverage/html coverage.lcov && open coverage/html/index.html",
         "spell": "npx cspell ."
