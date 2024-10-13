@@ -7,7 +7,8 @@ const entryPoint = "./src/integration/mod.ts";
 const outputPath = "./dist/integration.js";
 
 await esbuild.build({
-    plugins: [...denoPlugins()],
+    // FIXME: remove loader options
+    plugins: [...denoPlugins({ loader: "portable" })],
     entryPoints: [entryPoint],
     outfile: outputPath,
     bundle: true,
