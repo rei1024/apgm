@@ -5,7 +5,7 @@ APGsembly macro language
 APGM is a language created to output APGsembly. It uses structured programming
 and macros.
 
-[APGM - APGsembly macro language](https://rei1024.github.io/proj/apgm/)
+[APGM - APGsembly macro language](https://rei1024.github.io/apgm/)
 
 ## Pipeline
 
