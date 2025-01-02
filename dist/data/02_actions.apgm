@@ -37,12 +37,15 @@ sub_b1(); /* SUB B1 */
 mul_0(); /* MUL 0 */
 mul_1(); /* MUL 1 */
 
-/* HALT_OUT */
-halt_out(); /* HALT_OUT */
-
 /* NOP (no operation) */
 nop(); /* NOP */
 
 /* OUTPUT (digit printer) */
 output("0"); /* OUTPUT 0, NOP */
 output("."); /* OUTPUT ., NOP */
+
+/* HALT */
+halt(); /* HALT */
+
+/* HALT_OUT */
+halt_out(); /* HALT_OUT */
