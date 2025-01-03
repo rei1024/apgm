@@ -126,7 +126,7 @@ $run.addEventListener("click", () => {
     compile();
     if (!$copy.disabled) {
         const url = new URL(
-            "https://rei1024.github.io/proj/apgsembly-emulator-2/",
+            "https://rei1024.github.io/apgsembly-emulator/",
         );
         localStorage.setItem("initial_code", $output.value);
         open(url, undefined, "noreferrer=yes,noopener=yes");
