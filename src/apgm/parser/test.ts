@@ -8,6 +8,7 @@ import {
     ifAPGMExpr,
     macro,
     main,
+    statement,
 } from "./mod.ts";
 import { assertEquals, assertThrows, test } from "../../deps_test.ts";
 import { VarAPGMExpr } from "../ast/var.ts";
@@ -273,4 +274,19 @@ test("parser: pretty macro", () => {
 test("parser: pretty macro args", () => {
     const value = macro().tryParse(`macro f!(x, y) { output("3"); }`);
     assertEquals(value.pretty(), `macro f!(x, y) {output("3");}`);
+});
+
+test("parser: var decl U", () => {
+    const value = statement().tryParse("var x: U;");
+    assertEquals(value.pretty(), "var x: U");
+});
+
+test("parser: var decl B", () => {
+    const value = statement().tryParse("var x: B;");
+    assertEquals(value.pretty(), "var x: B");
+});
+
+test("parser: var decl blocks", () => {
+    const value = apgmExpr().tryParse("{ f(); var x: B; g(); }");
+    assertEquals(value.pretty(), "{f();\nvar x: B;\ng();}");
 });

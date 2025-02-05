@@ -21,6 +21,7 @@ import {
 import { type APGMSourceSpan } from "../ast/core.ts";
 import { createSpan } from "./lib/create_span.ts";
 import { stringLit } from "./lib/string.ts";
+import { VarDeclAPGMExpr } from "../ast/var_decl.ts";
 
 // https://stackoverflow.com/questions/16160190/regular-expression-to-find-c-style-block-comments#:~:text=35-,Try%20using,-%5C/%5C*(%5C*(%3F!%5C/)%7C%5B%5E*%5D)*%5C*%5C/
 export const comment = bnb.match(/\/\*(\*(?!\/)|[^*])*\*\//s).desc(
@@ -125,6 +126,17 @@ export const numberAPGMExpr: bnb.Parser<NumberAPGMExpr> = bnb.location.chain(
 export const stringAPGMExpr = stringLit.wrap(_, _).map((x) =>
     new StringAPGMExpr(x.value, x.span)
 );
+
+// var x: U
+const varDeclAPGMExpr = _.skip(bnb.text('var')).skip(someSpaces).chain(() => {
+    return identifierWithSpan.chain((ident) => {
+        return _.skip(bnb.text(':')).skip(someSpaces).chain(() => {
+            return bnb.text('U').or(bnb.text('B')).map((type) => {
+                return new VarDeclAPGMExpr(ident[0],type, ident[1]);
+            });
+        });
+    });
+})
 
 // 括弧なし
 export const seqAPGMExprRaw: bnb.Parser<APGMExpr[]> = bnb.lazy(() =>
@@ -252,6 +264,7 @@ export function statement(): bnb.Parser<APGMExpr> {
         whileAPGMExpr,
         ifAPGMExpr,
         apgmExpr().skip(semicolon),
+        varDeclAPGMExpr.skip(semicolon),
     );
 }
 

@@ -2,7 +2,6 @@ import { SeqAPGMExpr } from "./seq.ts";
 import { Macro } from "./macro.ts";
 import { Header } from "./header.ts";
 import { FuncAPGMExpr } from "./mod.ts";
-import { A } from "../../apgl/actions.ts";
 import {
     emptyArgFuncs,
     numArgFuncs,

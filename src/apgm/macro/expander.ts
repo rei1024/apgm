@@ -5,8 +5,10 @@ import {
     FuncAPGMExpr,
     Macro,
     Main,
+    SeqAPGMExpr,
     VarAPGMExpr,
 } from "../ast/mod.ts";
+import { VarDeclAPGMExpr } from "../ast/var_decl.ts";
 import { dups } from "./_dups.ts";
 
 function argumentsMessage(num: number): string {
@@ -56,14 +58,23 @@ function replaceVarInBoby(macro: Macro, funcExpr: FuncAPGMExpr): APGMExpr {
 
 const MAX_COUNT = 100000;
 
+type Vars = Map<string,
+    {
+        type: 'B' | 'U',
+        value: number,
+    }
+>
+
 export class MacroExpander {
     readonly #macroMap: Map<string, Macro>;
+    readonly #globalVarMap: Vars;
     #count = 0;
-    readonly #main;
+    readonly #mainSeqExpr: APGMExpr;
 
-    constructor(main: Main, macroMap: Map<string, Macro>) {
-        this.#main = main;
+    constructor(main: SeqAPGMExpr, macroMap: Map<string, Macro>, globalVarMap: Vars) {
+        this.#mainSeqExpr = main;
         this.#macroMap = macroMap;
+        this.#globalVarMap = globalVarMap;
     }
 
     static make(main: Main): MacroExpander {
@@ -80,11 +91,35 @@ export class MacroExpander {
                 span,
             );
         }
-        return new MacroExpander(main, macroMap);
+
+        const globalVarMap: Vars = new Map();
+        let lastB = 0;
+        let lastU = 0;
+
+        const withoutDeclSeq = [...main.seqExpr.exprs]
+        for (const expr of main.seqExpr.exprs) {
+            if (expr instanceof VarDeclAPGMExpr) {
+                if (globalVarMap.has(expr.name)) {
+                    throw new ErrorWithSpan(
+                        `Error: variable "${expr.name}" is already defined`,
+                        expr.span,
+                    );
+                }
+
+                globalVarMap.set(expr.name, {
+                    type: expr.type,
+                    value: expr.type === 'B' ? lastB++ : lastU++,
+                });
+            } else {
+                withoutDeclSeq.push(expr);
+            }
+        }
+
+        return new MacroExpander(new SeqAPGMExpr(withoutDeclSeq), macroMap, globalVarMap);
     }
 
     expand(): APGMExpr {
-        return this.#expandExpr(this.#main.seqExpr);
+        return this.#expandExpr(this.#mainSeqExpr);
     }
 
     #expandExpr(expr: APGMExpr): APGMExpr {
