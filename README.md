@@ -33,7 +33,7 @@ graph TD
 - `$ deno task t` Unit tests
 - `$ deno task w` Unit tests with file watcher
 - `$ deno task fmt` Formatting
-- `$ deno task bundle` Bundling
+- `$ deno task build` Bundling
 
 ## Coverage
 
