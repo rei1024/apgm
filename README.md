@@ -23,7 +23,7 @@ graph TD
 
 ### Requirements
 
-- `deno` above 2.0.0
+- `deno` above 2.3.5
   - <https://docs.deno.com/runtime/manual>
 
 ### Usage
@@ -32,17 +32,6 @@ graph TD
   - access to [http://localhost:1618/](http://localhost:1618/)
 - `$ deno task t` Unit tests
 - `$ deno task w` Unit tests with file watcher
+- `$ deno task cov` Unit tests coverage
 - `$ deno task fmt` Formatting
 - `$ deno task build` Bundling
-
-## Coverage
-
-### Requirements
-
-- `deno`
-- `lcov`
-  - https://formulae.brew.sh/formula/lcov
-
-### Usage
-
-- `$ deno task cov` open lcov page
