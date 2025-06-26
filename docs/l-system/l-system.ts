@@ -26,7 +26,10 @@ export function* lSystem<T>(
     }
 }
 
-export function lSystemArray<T>({ axiom, initial }: LSystem<T>, n: number): T[][] {
+export function lSystemArray<T>(
+    { axiom, initial }: LSystem<T>,
+    n: number,
+): T[][] {
     if (!Number.isInteger(n)) {
         throw Error("error");
     }

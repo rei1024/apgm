@@ -1,4 +1,6 @@
 {
     "files.trimTrailingWhitespace": true,
-    "deno.enablePaths": ["build.ts", "./src", "docs/data_next/pi_spigot.js"]
+    "deno.enablePaths": ["build.ts", "./src", "docs/data_next/pi_spigot.js"],
+    "editor.defaultFormatter": "denoland.vscode-deno",
+    "editor.formatOnSave": true
 }
