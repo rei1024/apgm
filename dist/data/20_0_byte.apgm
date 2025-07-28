@@ -1,0 +1,118 @@
+/*
+    # Byte operation
+*/
+
+/* Reset Un to 0 */
+macro u_to_0!(n) {
+    while_nz (tdec_u(n)) {}
+}
+
+/* move head to 0 */
+macro b_head_to_0!(n) {
+    while_nz (tdec_b(n)) {}
+}
+
+/**
+ * Copy Ua to Ub with help of Utemp
+ */
+macro copy_u!(a, b, temp) {
+    u_to_0!(b); /* Ensure b is zero before adding */
+    add_u!(a, b, temp);
+}
+
+/* Ub = Ua + Ub */
+macro add_u!(a, b, temp) {
+    while_nz (tdec_u(a)) {
+        inc_u(b);
+        inc_u(temp);
+    }
+    while_nz (tdec_u(temp)) {
+        inc_u(a);
+    }
+}
+
+macro CONST_8_U!() 8
+
+/**
+ * increment_byte!(byte_b, temp_u1, temp_u2)
+ * Increments an 8-bit binary number in `byte_b`, handling overflow (255 -> 0).
+ * `byte_b` is modified in place.
+ * `temp_u1` is used as a temporary counter for iterating through bits.
+ * `temp_u2` is used as a temporary for copying CONST_8_U.
+ */
+macro increment_byte!(byte_b, temp_u1, temp_u2) {
+    copy_u!(CONST_8_U!(), temp_u1, temp_u2); /* temp_u1 now holds 8 (number of bits) */
+
+    loop {
+        if_z (tdec_u(temp_u1)) { /* Decrement bit counter. If 0, we've iterated 8 times. */
+            break(); /* All 8 bits processed (or overflow occurred) */
+        }
+
+        if_z (read_b(byte_b)) {
+            set_b(byte_b); /* Set current bit to 1 */
+            break(); /* Done incrementing, exit the loop */
+        } else {
+            /* Current bit was 1, so clear it (already cleared by read_b) and carry over */
+            inc_b(byte_b); /* Move to next bit for carrying */
+        }
+    }
+
+    /* After the loop, the head is at the bit that was flipped (or beyond if overflowed). */
+    /* Move head to the end of the 8-bit block. */
+    while_nz (tdec_u(temp_u1)) { /* temp_u1 holds remaining iterations from loop */
+        inc_b(byte_b);
+    }
+
+    copy_u!(CONST_8_U!(), temp_u1, temp_u2); /* Reset temp_u1 to 8 */
+
+    /* Restore head position to the start of the 8-bit block. */
+    while_nz (tdec_u(temp_u1)) {
+        tdec_b(byte_b);
+    }
+}
+
+/**
+ * decrement_byte!(byte_b, temp_u1, temp_u2)
+ * Decrements an 8-bit binary number in `byte_b`, handling underflow (0 -> 255).
+ * `byte_b` is modified in place.
+ * `temp_u1` is used as a temporary counter for iterating through bits.
+ * `temp_u2` is used as a temporary for copying CONST_8_U.
+ */
+macro decrement_byte!(byte_b, temp_u1, temp_u2) {
+    copy_u!(CONST_8_U!(), temp_u1, temp_u2); /* temp_u1 now holds 8 (number of bits) */
+
+    loop { /* Use an explicit loop for break() to work */
+        if_z (tdec_u(temp_u1)) { /* Decrement bit counter. If 0, we've iterated 8 times. */
+            break(); /* All 8 bits processed (or underflow occurred) */
+        }
+
+        if_nz (read_b(byte_b)) { /* If current bit is 1 */
+            break(); /* Found the 1 to flip to 0, done decrementing, exit the loop */
+        } else { /* Current bit is 0, so clear it (already cleared by read_b) and borrow */
+            set_b(byte_b); /* Set current bit to 1 (borrowed from next) */
+            inc_b(byte_b); /* Move to next bit for borrowing */
+        }
+    }
+
+    /* After the loop, the head is at the bit that was flipped (or beyond if underflowed). */
+    /* Move head to the end of the 8-bit block. */
+    while_nz (tdec_u(temp_u1)) { /* temp_u1 holds remaining iterations from loop */
+        inc_b(byte_b);
+    }
+
+    copy_u!(CONST_8_U!(), temp_u1, temp_u2); /* Reset temp_u1 to 8 */
+
+    /* Restore head position to the start of the 8-bit block. */
+    while_nz (tdec_u(temp_u1)) {
+        tdec_b(byte_b);
+    }
+}
+
+#REGISTERS { "U8": 8, "B0": [0, "10000000"] }
+
+increment_byte!(0, 0, 1);
+decrement_byte!(0, 0, 1);
+decrement_byte!(0, 0, 1);
+decrement_byte!(0, 0, 1);
+
+repeat(256, increment_byte!(0, 0, 1));
