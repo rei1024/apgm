@@ -10,7 +10,7 @@
         // reload dependency
         "reload": "deno test --allow-import --reload",
         // local server
-        "up": "deno run --allow-net --allow-read --allow-sys jsr:@std/http@^1.0.4/file-server . -p 1618",
+        "up": "deno run --allow-net --allow-read --allow-sys jsr:@std/http@^1.0.20/file-server . -p 1618",
         // build
         "build": "deno run --allow-net=esm.sh,rei1024.github.io --allow-import --allow-env --allow-read --allow-write --allow-run build.ts",
         // coverage
@@ -43,7 +43,8 @@
         }
     },
     "imports": {
+        "@deno/esbuild-plugin": "jsr:@deno/esbuild-plugin@^1.1.4",
         "@std/assert": "jsr:@std/assert@^1.0.3",
-        "esbuild": "npm:esbuild@0.25.5"
+        "esbuild": "npm:esbuild@0.25.8"
     }
 }

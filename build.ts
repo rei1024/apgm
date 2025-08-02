@@ -1,5 +1,5 @@
 import * as esbuild from "esbuild";
-import { denoPlugins } from "jsr:@luca/esbuild-deno-loader@0.11.1";
+import { denoPlugin } from "@deno/esbuild-plugin";
 
 // deno run --allow-net=esm.sh,rei1024.github.io:443 --allow-env --allow-read --allow-write=. --allow-run build.ts
 
@@ -8,7 +8,7 @@ const outputPath = "./dist/integration.js";
 
 await esbuild.build({
     // FIXME: remove loader options
-    plugins: [...denoPlugins({ loader: "portable" })],
+    plugins: [denoPlugin()],
     entryPoints: [entryPoint],
     outfile: outputPath,
     bundle: true,
