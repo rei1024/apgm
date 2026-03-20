@@ -43,6 +43,7 @@
         }
     },
     "imports": {
+        "apgsembly-emulator-exports": "https://raw.githubusercontent.com/rei1024/apgsembly-emulator/refs/tags/2026-03-20/src/exports.js",
         "@deno/esbuild-plugin": "jsr:@deno/esbuild-plugin@^1.1.4",
         "@std/assert": "jsr:@std/assert@^1.0.3",
         "esbuild": "npm:esbuild@0.25.8"
