@@ -55,6 +55,29 @@ export class A {
         return A.nonReturn("SET B2D");
     }
 
+    // PRINTER
+    // PRINT, INC PRNX, INC PRNY, TDEC PRNX, TDEC PRNY
+
+    static print() {
+        return A.nonReturn("PRINT");
+    }
+
+    static incPRNX() {
+        return A.nonReturn("INC PRNX");
+    }
+
+    static tdecPRNX() {
+        return A.single("TDEC PRNX");
+    }
+
+    static incPRNY() {
+        return A.nonReturn("INC PRNY");
+    }
+
+    static tdecPRNY() {
+        return A.single("TDEC PRNY");
+    }
+
     // B
     static incB(n: number) {
         return A.nonReturn(`INC B${n}`);
