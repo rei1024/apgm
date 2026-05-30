@@ -443,7 +443,7 @@ macro print_char!(code_b, temp_u1, temp_u2, temp_u3) {
 
     b_head_to_0!(FONT_DATA!());
 
-    /* Go to next Ccaracter */
+    /* Go to next Character */
     copy_u!(const_8_U!(), temp_u2, temp_u3);
     while_nz (tdec_u(temp_u2)) {
         inc_b2dy();
