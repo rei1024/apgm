@@ -119,6 +119,30 @@ export const emptyArgFuncs: Map<string, { expr: APGLExpr; desc: string }> =
                 "set the bit at the read head to 1, breaks if that bit already equals 1",
         }],
 
+        ["inc_prnx", {
+            expr: A.incPRNX(),
+            desc: "increases the X position of the read head",
+        }],
+        ["inc_prny", {
+            expr: A.incPRNY(),
+            desc: "increases the Y position of the read head",
+        }],
+        ["tdec_prnx", {
+            expr: A.tdecPRNX(),
+            desc:
+                "returns Z if X read head is at least significant bit and NZ otherwise, and then decreases X position by 1 if NZ",
+        }],
+        ["tdec_prny", {
+            expr: A.tdecPRNY(),
+            desc:
+                "returns Z if Y read head is at least significant bit and NZ otherwise, and then decreases Y position by 1 if NZ",
+        }],
+        ["print", {
+            expr: A.print(),
+            desc:
+                "set the bit at the read head to 1, breaks if that bit already equals 1",
+        }],
+
         // ADD
         ["add_a1", { expr: A.addA1(), desc: "binary adder" }],
         ["add_b0", { expr: A.addB0(), desc: "binary adder" }],
