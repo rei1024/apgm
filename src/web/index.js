@@ -6,7 +6,7 @@ import { downloadBlob } from "./util/download.js";
 import { initEditor, initMonaco } from "./apgm_monaco/init.js";
 import { setupCopy } from "./copy.js";
 
-import { formatAPGsembly, integration } from "./integration.js";
+import { formatAPGsembly, integration } from "../integration/mod.ts";
 
 initMonaco();
 
@@ -36,7 +36,7 @@ const $configButton = $$("#config_button", HTMLButtonElement);
 const editor = initEditor($apgmInput);
 
 /**
- * @param {Error & { apgmSpan?: import('../src/apgm/ast/core').APGMSourceSpan }} e
+ * @param {Error & { apgmSpan?: import('../apgm/ast/core.ts').APGMSourceSpan }} e
  */
 export function showError(e) {
     try {
@@ -75,7 +75,7 @@ const compile = (withReaction = true) => {
     resetError();
     try {
         /**
-         * @type {import('../src/integration/mod').IntegrationOptions}
+         * @type {import('../integration/mod.ts').IntegrationOptions}
          */
         const options = {};
         if ($prefixInput.value.trim() !== "") {
@@ -101,10 +101,8 @@ const compile = (withReaction = true) => {
                 $compile.style.backgroundColor = "";
             }
         }, 500);
-    } catch (e) {
-        if (!(e instanceof Error)) {
-            e = new Error("unknown error");
-        }
+    } catch (err) {
+        const e = err instanceof Error ? err : new Error("unknown error");
 
         $output.value = e.message;
         $output.classList.add("is-invalid");
@@ -139,14 +137,14 @@ $download.addEventListener("click", () => {
     downloadBlob(new Blob([$output.value]), "output.apg");
 });
 
-const DATA_DIR = "./dist/data/";
+const DATA_DIR = (import.meta.env.BASE_URL ?? "./") + "data/";
 
 $examples.forEach((example) => {
     if (!(example instanceof HTMLElement)) {
         throw Error("example is not HTMLElement");
     }
     example.addEventListener("click", () => {
-        fetch(DATA_DIR + example.dataset.src)
+        fetch(DATA_DIR + example.dataset["src"])
             .then((x) => x.text())
             .then((str) => {
                 editor.setValue(str);

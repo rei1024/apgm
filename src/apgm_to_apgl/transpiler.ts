@@ -82,7 +82,7 @@ function transpileStringArgFunc(
     return expr(arg.value);
 }
 
-// desription from  "Conway's Game of Life: Mathematics and Construction" (2022)
+// description from  "Conway's Game of Life: Mathematics and Construction" (2022)
 
 export const emptyArgFuncs: Map<string, { expr: APGLExpr; desc: string }> =
     new Map([

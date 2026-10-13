@@ -43,7 +43,7 @@ function div(n, d) {
     return { q, r };
 }
 
-// deno run docs/data_next/div_bin.js
+// node docs/data_next/div_bin.js
 for (let i = 0n; i <= 100n; i++) {
     for (let j = 1n; j <= 100n; j++) {
         const { q, r } = div(i, j);

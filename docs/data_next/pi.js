@@ -1,6 +1,6 @@
 // @ts-check
 
-// deno run docs/data_next/pi.js
+// node docs/data_next/pi.js
 import process from "node:process";
 
 /**
