@@ -19,19 +19,19 @@ graph TD
     APGL3[APGL] -->|Transpile| APGsembly[APGsembly]
 ```
 
-## Testing
+## Development
 
 ### Requirements
 
-- `deno` above 2.3.5
-  - <https://docs.deno.com/runtime/manual>
+- Node.js (see `.node-version`)
+- npm
 
 ### Usage
 
-- `$ deno task up` Local server
-  - access to [http://localhost:1618/](http://localhost:1618/)
-- `$ deno task t` Unit tests
-- `$ deno task w` Unit tests with file watcher
-- `$ deno task cov` Unit tests coverage
-- `$ deno task fmt` Formatting
-- `$ deno task build` Bundling
+- `$ npm run dev` Local development server
+- `$ npm run test` Unit tests with Vitest
+- `$ npm run test:watch` Unit tests with file watcher
+- `$ npm run coverage` Unit tests coverage
+- `$ npm run build` Build for production with Vite
+- `$ npm run preview` Preview production build
+- `$ npm run spell` Spell check with cspell

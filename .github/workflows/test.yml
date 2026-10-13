@@ -1,4 +1,4 @@
-name: Test by Deno
+name: Test
 
 permissions:
     contents: read
@@ -14,15 +14,11 @@ jobs:
         timeout-minutes: 15
 
         steps:
-            - name: Git Checkout Deno Module
-              uses: actions/checkout@v5
-            - name: Install Deno
-              uses: denoland/setup-deno@v2
+            - name: Checkout
+              uses: actions/checkout@v7
+            - uses: actions/setup-node@v7
               with:
-                  deno-version: v2.x # latest
-            # - name: Lint Deno Module
-            #   run: deno fmt --check
-            # - name: Build Deno Module
-            #   run: deno run --reload mod.ts
-            - name: Run Test
-              run: deno task t
+                  node-version-file: "./.node-version"
+            - run: npm ci
+            - run: npm run test
+            - run: npm run build

@@ -7,7 +7,6 @@ import {
 } from "../apgm_to_apgl/transpiler.ts";
 
 // for editor
-// deno-fmt-ignore
 export { emptyArgFuncs, numArgFuncs, strArgFuncs, parseMain }
 
 export { completionParser } from "../apgm/parser/completion_parser.ts";

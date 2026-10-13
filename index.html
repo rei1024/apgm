@@ -59,7 +59,13 @@
         />
 
         <!-- no defer -->
-        <script src="./define-require.js"></script>
+        <script>
+            window.require = {
+                paths: {
+                    "vs": "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0/min/vs",
+                },
+            };
+        </script>
 
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.51.0/min/vs/loader.min.js"
@@ -91,8 +97,7 @@
         ></script>
         <!-- End Bootstrap -->
 
-        <script src="./dist/integration.js" type="module"></script>
-        <script src="./dist/index.js" type="module"></script>
+        <script src="./src/web/index.js" type="module"></script>
         <link rel="stylesheet" href="./style.css" />
     </head>
     <body>

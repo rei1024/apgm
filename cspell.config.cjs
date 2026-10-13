@@ -5,7 +5,9 @@ module.exports = {
         "coverage.lcov",
         "package-lock.json",
         "node_modules",
-        "dist/integration.js",
+        "dist",
+        "public/data",
+        "public/lib",
     ],
     "ignoreWords": [
         "APGL",
@@ -25,7 +27,6 @@ module.exports = {
         "noopener",
         "importmap",
         "popperjs",
-        "deno",
         "Ackermann",
         "Thue",
         "Lindenmayer",

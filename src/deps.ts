@@ -1,4 +1,4 @@
-export * as bnb from "https://esm.sh/bread-n-butter@0.6.0";
+export * as bnb from "bread-n-butter";
 
 export {
     Action,
@@ -8,4 +8,4 @@ export {
     NopAction,
     parseAction,
     runAPGsembly,
-} from "apgsembly-emulator-exports";
+} from "apgsembly-emulator/src/exports.js";

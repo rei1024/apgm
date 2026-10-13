@@ -2,7 +2,12 @@
 .DS_Store
 .idea
 
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Test Coverage
 coverage/
 coverage.lcov
-
-deno.lock

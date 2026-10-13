@@ -1,6 +1,6 @@
 // https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.Hover.html
 
-import { parseMain } from "../integration.js";
+import { parseMain } from "../../integration/mod.ts";
 
 /**
  * @typedef {{ contents: { value: string }[]; range?: any }} Hover

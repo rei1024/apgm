@@ -1,5 +1,4 @@
 // @ts-check
-// deno-lint-ignore-file
 
 // Unbounded Spigot Algorithms for the Digits of Pi - Jeremy Gibbons
 // https://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/spigot.pdf
@@ -53,19 +52,18 @@ export function* piSpigot() {
     }
 }
 
-// deno run docs/data_next/pi_spigot.js
+// node docs/data_next/pi_spigot.js
 let i = 0;
 const encoder = new TextEncoder();
-const writer = Deno.stdout.writable.getWriter();
 for (const x of piSpigot()) {
-    await writer.write(encoder.encode(x.toString()));
+    process.stdout.write(encoder.encode(x.toString()));
     i++;
     if (i >= 1000) {
         break;
     }
     if (i === 1) {
-        await writer.write(encoder.encode("."));
+        process.stdout.write(encoder.encode("."));
     }
 }
 
-await writer.write(encoder.encode("\n"));
+process.stdout.write(encoder.encode("\n"));
